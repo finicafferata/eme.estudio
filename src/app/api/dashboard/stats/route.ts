@@ -198,6 +198,120 @@ export async function GET() {
       count: ct._count.id
     }))
 
+    // Get today's and tomorrow's classes with attendance
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const dayAfterTomorrow = new Date(tomorrow)
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1)
+
+    const todaysClasses = await prisma.class.findMany({
+      where: {
+        startsAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      },
+      include: {
+        classType: {
+          select: {
+            name: true
+          }
+        },
+        instructor: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        },
+        reservations: {
+          where: {
+            status: 'CONFIRMED'
+          },
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        startsAt: 'asc'
+      }
+    })
+
+    const tomorrowsClasses = await prisma.class.findMany({
+      where: {
+        startsAt: {
+          gte: tomorrow,
+          lt: dayAfterTomorrow
+        }
+      },
+      include: {
+        classType: {
+          select: {
+            name: true
+          }
+        },
+        instructor: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        },
+        reservations: {
+          where: {
+            status: 'CONFIRMED'
+          },
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        startsAt: 'asc'
+      }
+    })
+
+    const formatClassesWithAttendance = (classes: any[]) => {
+      return classes.map(classItem => ({
+        id: classItem.id,
+        title: classItem.classType.name,
+        time: new Date(classItem.startsAt).toLocaleTimeString('es-AR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        instructor: `${classItem.instructor?.user.firstName} ${classItem.instructor?.user.lastName}`,
+        capacity: classItem.capacity,
+        attendees: classItem.reservations.map((reservation: any) => ({
+          id: reservation.id,
+          name: `${reservation.user.firstName} ${reservation.user.lastName}`,
+          email: reservation.user.email
+        })),
+        attendeeCount: classItem.reservations.length,
+        spotsAvailable: classItem.capacity - classItem.reservations.length
+      }))
+    }
+
     const stats = {
       overview: {
         totalStudents,
@@ -221,6 +335,10 @@ export async function GET() {
       },
       metrics: {
         avgPackageUtilization: Math.round(avgUtilization * 100) / 100
+      },
+      attendance: {
+        today: formatClassesWithAttendance(todaysClasses),
+        tomorrow: formatClassesWithAttendance(tomorrowsClasses)
       }
     }
 

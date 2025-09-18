@@ -37,7 +37,7 @@ export function LoginForm({ className }: LoginFormProps) {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        setError('Correo electrónico o contraseña inválidos')
         return
       }
 
@@ -46,7 +46,7 @@ export function LoginForm({ className }: LoginFormProps) {
         window.location.href = callbackUrl
       }
     } catch (error) {
-      setError('An unexpected error occurred')
+      setError('Ocurrió un error inesperado')
     } finally {
       setIsLoading(false)
     }
@@ -65,7 +65,7 @@ export function LoginForm({ className }: LoginFormProps) {
         <div className="grid gap-4">
           <div className="grid gap-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              Correo Electrónico
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -76,7 +76,7 @@ export function LoginForm({ className }: LoginFormProps) {
                 autoComplete="email"
                 required
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="your-email@example.com"
+                placeholder="tu-email@ejemplo.com"
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
@@ -85,7 +85,7 @@ export function LoginForm({ className }: LoginFormProps) {
           </div>
           <div className="grid gap-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              Contraseña
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -96,7 +96,7 @@ export function LoginForm({ className }: LoginFormProps) {
                 autoComplete="current-password"
                 required
                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Enter your password"
+                placeholder="Ingresa tu contraseña"
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isLoading}
@@ -130,22 +130,22 @@ export function LoginForm({ className }: LoginFormProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Iniciando sesión...
               </>
             ) : (
-              'Sign In'
+              'Iniciar Sesión'
             )}
           </button>
         </div>
       </form>
 
       <div className="text-center text-sm text-gray-600">
-        Don&apos;t have an account?{' '}
+        ¿No tienes una cuenta?{' '}
         <a
           href="/register"
           className="font-medium text-primary hover:text-primary/80"
         >
-          Contact administrator
+          Contactar administrador
         </a>
       </div>
     </div>

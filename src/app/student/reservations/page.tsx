@@ -444,8 +444,8 @@ export default function StudentReservationsPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Reservations</h1>
-          <p className="text-muted-foreground">Manage your booked classes and view your schedule</p>
+          <h1 className="text-3xl font-bold tracking-tight">Mis Reservas</h1>
+          <p className="text-muted-foreground">Gestiona tus clases reservadas y ve tu horario</p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -493,7 +493,7 @@ export default function StudentReservationsPage() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{summary.upcoming}</div>
-              <div className="text-sm text-muted-foreground">Upcoming</div>
+              <div className="text-sm text-muted-foreground">Próximas</div>
             </div>
           </CardContent>
         </Card>
@@ -501,7 +501,7 @@ export default function StudentReservationsPage() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{summary.completed}</div>
-              <div className="text-sm text-muted-foreground">Completed</div>
+              <div className="text-sm text-muted-foreground">Completadas</div>
             </div>
           </CardContent>
         </Card>
@@ -509,7 +509,7 @@ export default function StudentReservationsPage() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{summary.cancelled}</div>
-              <div className="text-sm text-muted-foreground">Cancelled</div>
+              <div className="text-sm text-muted-foreground">Canceladas</div>
             </div>
           </CardContent>
         </Card>

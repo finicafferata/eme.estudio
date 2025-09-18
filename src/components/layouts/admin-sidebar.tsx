@@ -17,49 +17,49 @@ import {
 
 const navigation = [
   {
-    name: 'Dashboard',
+    name: 'Panel de Control',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     description: 'Vista general del estudio',
   },
   {
-    name: 'Students',
+    name: 'Estudiantes',
     href: '/admin/students',
     icon: Users,
     description: 'Gestión de estudiantes',
   },
   {
-    name: 'Packages',
+    name: 'Paquetes',
     href: '/admin/packages',
     icon: Package,
     description: 'Paquetes y suscripciones',
   },
   {
-    name: 'Classes',
+    name: 'Clases',
     href: '/admin/classes',
     icon: Calendar,
     description: 'Calendario de clases',
   },
   {
-    name: 'Reservations',
+    name: 'Reservas',
     href: '/admin/reservations',
     icon: BookOpen,
     description: 'Gestión de reservas',
   },
   {
-    name: 'Payments',
+    name: 'Pagos',
     href: '/admin/payments',
     icon: CreditCard,
     description: 'Pagos y facturación',
   },
   {
-    name: 'Analytics',
+    name: 'Análisis',
     href: '/admin/analytics',
     icon: BarChart3,
     description: 'Análisis y reportes',
   },
   {
-    name: 'Settings',
+    name: 'Configuración',
     href: '/admin/settings',
     icon: Settings,
     description: 'Configuración del sistema',

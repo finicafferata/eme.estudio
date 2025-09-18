@@ -219,28 +219,28 @@ export default function StudentClassesPage() {
         return (
           <Badge className="bg-green-100 text-green-800 border-green-300">
             <CheckCircle className="w-3 h-3 mr-1" />
-            Eligible
+            Elegible
           </Badge>
         )
       case 'no_package':
         return (
           <Badge className="bg-red-100 text-red-800 border-red-300">
             <XCircle className="w-3 h-3 mr-1" />
-            No Package
+            Sin Paquete
           </Badge>
         )
       case 'wrong_type':
         return (
           <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Wrong Type
+            Tipo Incorrecto
           </Badge>
         )
       case 'no_credits':
         return (
           <Badge className="bg-red-100 text-red-800 border-red-300">
             <CreditCard className="w-3 h-3 mr-1" />
-            No Credits
+            Sin Créditos
           </Badge>
         )
     }
@@ -294,9 +294,9 @@ export default function StudentClassesPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Available Classes</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Clases Disponibles</h1>
           <p className="text-muted-foreground">
-            Book classes using your package credits
+            Reserva clases usando los créditos de tu paquete
           </p>
         </div>
         <Button
@@ -305,7 +305,7 @@ export default function StudentClassesPage() {
           disabled={loading}
         >
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          Actualizar
         </Button>
       </div>
 
@@ -322,7 +322,7 @@ export default function StudentClassesPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <CreditCard className="mr-2 h-5 w-5" />
-              Your Active Packages
+              Tus Paquetes Activos
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -331,14 +331,14 @@ export default function StudentClassesPage() {
                 <div key={pkg.id} className="border rounded-lg p-4">
                   <div className="font-medium">{pkg.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {pkg.classType ? `For ${pkg.classType.name}` : 'General package'}
+                    {pkg.classType ? `Para ${pkg.classType.name}` : 'Paquete general'}
                   </div>
                   <div className="mt-2">
                     <div className="text-lg font-bold text-green-600">
-                      {pkg.remainingCredits} credits left
+                      {pkg.remainingCredits} créditos restantes
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      of {pkg.totalCredits} total
+                      de {pkg.totalCredits} total
                     </div>
                   </div>
                   {pkg.expiresAt && (
@@ -607,7 +607,7 @@ export default function StudentClassesPage() {
                             <div className="flex justify-between items-center w-full">
                               <span>{pkg.name}</span>
                               <span className="text-sm text-green-600 ml-2">
-                                {pkg.remainingCredits} credits left
+                                {pkg.remainingCredits} créditos restantes
                               </span>
                             </div>
                             {pkg.classTypeName && (

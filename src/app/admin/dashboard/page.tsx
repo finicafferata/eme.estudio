@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Users, Package, Calendar, DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
+import { Users, Package, Calendar, DollarSign, TrendingUp, TrendingDown, Clock, User } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function SimpleAdminDashboard() {
@@ -97,6 +97,113 @@ export default function SimpleAdminDashboard() {
             <p className="text-xs text-gray-600 mt-2">
               USD ${stats?.overview?.monthlyRevenue?.usd || 0}
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Attendance for Today and Tomorrow */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Today's Classes */}
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-blue-600" />
+              Clases de Hoy
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats?.attendance?.today?.length > 0 ? (
+              <div className="space-y-4">
+                {stats.attendance.today.map((classItem: any) => (
+                  <div key={classItem.id} className="border rounded-lg p-4 bg-blue-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-blue-900">{classItem.title}</h3>
+                        <div className="flex items-center text-sm text-blue-700 mt-1">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {classItem.time} - {classItem.instructor}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-blue-800">
+                          {classItem.attendeeCount}/{classItem.capacity} inscritos
+                        </div>
+                        <div className="text-xs text-blue-600">
+                          {classItem.spotsAvailable} espacios disponibles
+                        </div>
+                      </div>
+                    </div>
+                    {classItem.attendees.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-800 mb-2">Estudiantes inscritos:</h4>
+                        <div className="grid grid-cols-1 gap-1">
+                          {classItem.attendees.map((attendee: any) => (
+                            <div key={attendee.id} className="flex items-center text-sm text-blue-700">
+                              <User className="w-3 h-3 mr-2" />
+                              {attendee.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center py-4">No hay clases programadas para hoy</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tomorrow's Classes */}
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-green-600" />
+              Clases de Mañana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats?.attendance?.tomorrow?.length > 0 ? (
+              <div className="space-y-4">
+                {stats.attendance.tomorrow.map((classItem: any) => (
+                  <div key={classItem.id} className="border rounded-lg p-4 bg-green-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-green-900">{classItem.title}</h3>
+                        <div className="flex items-center text-sm text-green-700 mt-1">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {classItem.time} - {classItem.instructor}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-green-800">
+                          {classItem.attendeeCount}/{classItem.capacity} inscritos
+                        </div>
+                        <div className="text-xs text-green-600">
+                          {classItem.spotsAvailable} espacios disponibles
+                        </div>
+                      </div>
+                    </div>
+                    {classItem.attendees.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium text-green-800 mb-2">Estudiantes inscritos:</h4>
+                        <div className="grid grid-cols-1 gap-1">
+                          {classItem.attendees.map((attendee: any) => (
+                            <div key={attendee.id} className="flex items-center text-sm text-green-700">
+                              <User className="w-3 h-3 mr-2" />
+                              {attendee.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center py-4">No hay clases programadas para mañana</p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -39,10 +39,10 @@ export default function Home() {
         <div className="text-center">
           <div className="mb-6">
             <h1 className="text-4xl font-bold text-primary mb-2">EME Estudio</h1>
-            <p className="text-gray-600">Professional Fitness Studio</p>
+            <p className="text-gray-600">Estudio Profesional de Tufting</p>
           </div>
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
     )
@@ -53,9 +53,9 @@ export default function Home() {
       <div className="text-center">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-primary mb-2">EME Estudio</h1>
-          <p className="text-gray-600">Professional Fitness Studio</p>
+          <p className="text-gray-600">Estudio Profesional de Tufting</p>
         </div>
-        <p className="text-gray-600">Redirecting...</p>
+        <p className="text-gray-600">Redirigiendo...</p>
       </div>
     </div>
   )

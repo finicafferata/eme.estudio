@@ -7,22 +7,22 @@ import { Calendar, Home, BookOpen, User, CreditCard } from 'lucide-react'
 
 const studentNavItems = [
   {
-    title: 'Dashboard',
+    title: 'Panel',
     href: '/student/dashboard',
     icon: Home
   },
   {
-    title: 'Available Classes',
+    title: 'Clases Disponibles',
     href: '/student/classes',
     icon: Calendar
   },
   {
-    title: 'My Reservations',
+    title: 'Mis Reservas',
     href: '/student/reservations',
     icon: BookOpen
   },
   {
-    title: 'My Credits',
+    title: 'Mis Créditos',
     href: '/student/credits',
     icon: CreditCard
   }

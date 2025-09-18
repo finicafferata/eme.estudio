@@ -156,20 +156,20 @@ export default function StudentCreditsPage() {
         return (
           <Badge className="bg-orange-100 text-orange-800 border-orange-300">
             <AlertTriangle className="w-3 h-3 mr-1" />
-            Expires in {pkg.daysUntilExpiry} day{pkg.daysUntilExpiry !== 1 ? 's' : ''}
+            Vence en {pkg.daysUntilExpiry} día{pkg.daysUntilExpiry !== 1 ? 's' : ''}
           </Badge>
         )
       case 'expired':
         return (
           <Badge className="bg-red-100 text-red-800 border-red-300">
             <Clock className="w-3 h-3 mr-1" />
-            Expired
+            Vencido
           </Badge>
         )
       case 'no_expiry':
         return (
           <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-            No Expiry
+            Sin Vencimiento
           </Badge>
         )
       default:
@@ -180,13 +180,13 @@ export default function StudentCreditsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>
+        return <Badge className="bg-green-100 text-green-800">Activo</Badge>
       case 'EXPIRED':
-        return <Badge className="bg-red-100 text-red-800">Expired</Badge>
+        return <Badge className="bg-red-100 text-red-800">Vencido</Badge>
       case 'USED_UP':
-        return <Badge className="bg-gray-100 text-gray-800">Used Up</Badge>
+        return <Badge className="bg-gray-100 text-gray-800">Agotado</Badge>
       case 'CANCELLED':
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>
+        return <Badge className="bg-red-100 text-red-800">Cancelado</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }

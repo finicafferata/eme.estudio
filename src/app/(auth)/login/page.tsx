@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { LoginForm } from '@/components/auth/login-form'
 
 export const metadata: Metadata = {
-  title: 'Login | EME Estudio',
-  description: 'Sign in to your EME Estudio account',
+  title: 'Iniciar Sesión | EME Estudio',
+  description: 'Inicia sesión en tu cuenta de EME Estudio',
 }
 
 export default function LoginPage() {
@@ -13,10 +13,10 @@ export default function LoginPage() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-primary mb-2">EME Estudio</h1>
           <h2 className="text-2xl font-semibold text-gray-900">
-            Welcome back
+            Bienvenido de nuevo
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to your account to continue
+            Inicia sesión en tu cuenta para continuar
           </p>
         </div>
 
@@ -26,13 +26,13 @@ export default function LoginPage() {
 
         <div className="text-center text-xs text-gray-500">
           <p>
-            By signing in, you agree to our{' '}
+            Al iniciar sesión, aceptas nuestros{' '}
             <a href="/terms" className="text-primary hover:text-primary/80">
-              Terms of Service
+              Términos de Servicio
             </a>{' '}
-            and{' '}
+            y{' '}
             <a href="/privacy" className="text-primary hover:text-primary/80">
-              Privacy Policy
+              Política de Privacidad
             </a>
           </p>
         </div>
