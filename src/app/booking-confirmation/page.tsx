@@ -342,7 +342,7 @@ export default function BookingConfirmationPage() {
       {/* Next Steps */}
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>What's Next?</CardTitle>
+          <CardTitle>What&apos;s Next?</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -351,7 +351,7 @@ export default function BookingConfirmationPage() {
                 <Mail className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Check Your Email</strong><br />
-                  We've sent confirmation details and class information to your email.
+                  We&apos;ve sent confirmation details and class information to your email.
                 </AlertDescription>
               </Alert>
             )}

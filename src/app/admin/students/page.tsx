@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, Plus, Eye, Edit, Package, CreditCard, SortAsc, SortDesc, Filter } from 'lucide-react'
+import { Search, Plus, Eye, Edit, Package, CreditCard, SortAsc, SortDesc, Filter, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -226,6 +226,31 @@ export default function StudentsPage() {
     setCurrentPage(1)
   }
 
+  const handleActivateUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/activate`, {
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al activar usuario')
+      }
+
+      const result = await response.json()
+      setError(null)
+
+      // Refresh the students list to show updated status
+      fetchStudents()
+
+      // You could also show a success message here
+      console.log('Usuario activado:', result.message)
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al activar usuario')
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -234,6 +259,10 @@ export default function StudentsPage() {
         return <Badge variant="secondary">Inactivo</Badge>
       case 'SUSPENDED':
         return <Badge variant="warning">Suspendido</Badge>
+      case 'PENDING_ACTIVATION':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">Pendiente Activación</Badge>
+      case 'PENDING_VERIFICATION':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">Pendiente Verificación</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -475,6 +504,17 @@ export default function StudentsPage() {
                       <TableCell>{formatDate(student.createdAt)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
+                          {student.status === 'PENDING_ACTIVATION' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
+                              onClick={() => handleActivateUser(student.id)}
+                              title="Activar Usuario"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"

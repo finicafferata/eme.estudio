@@ -384,7 +384,7 @@ export default function GuestBookingForm({ classData, onSuccess, onCancel }: Gue
         <Mail className="h-4 w-4" />
         <AlertDescription>
           <div className="text-sm">
-            <strong>First time booking?</strong> We'll automatically create an account for you.
+            <strong>First time booking?</strong> We&apos;ll automatically create an account for you.
             Check your email for activation instructions and booking confirmation.
           </div>
         </AlertDescription>

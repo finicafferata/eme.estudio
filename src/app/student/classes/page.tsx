@@ -551,7 +551,7 @@ export default function StudentClassesPage() {
                     <div className="space-y-2">
                       <div className="font-medium">Booking Confirmed!</div>
                       <div className="text-sm">
-                        Your class has been successfully booked. You'll receive an email confirmation shortly with all the details.
+                        Your class has been successfully booked. You&apos;ll receive an email confirmation shortly with all the details.
                       </div>
                       <div className="text-sm">
                         <strong>Confirmation ID:</strong> {bookingResult.reservation?.id || 'Generated'}
@@ -634,7 +634,7 @@ export default function StudentClassesPage() {
                           const pkg = selectedClass.eligibility.eligiblePackages.find(p => p.id === selectedPackage)
                           return pkg && (
                             <div className="mt-1 text-xs text-blue-700">
-                              You'll have {pkg.remainingCredits - 1} credits remaining after this booking.
+                              You&apos;ll have {pkg.remainingCredits - 1} credits remaining after this booking.
                             </div>
                           )
                         })()}
