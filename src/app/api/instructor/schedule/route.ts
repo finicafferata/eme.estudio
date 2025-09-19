@@ -358,7 +358,7 @@ function getChangeType(classItem: any): string {
 }
 
 // Helper function to get instructor's recurring patterns
-export async function getInstructorRecurringPatterns(instructorId: bigint) {
+async function getInstructorRecurringPatterns(instructorId: bigint) {
   return await prisma.recurringClassPattern.findMany({
     where: {
       instructorId,
