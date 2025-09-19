@@ -33,6 +33,7 @@ declare module 'next-auth' {
 // }
 
 export const authOptions = {
+  trustHost: true,
   session: {
     strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
