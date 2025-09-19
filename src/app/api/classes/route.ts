@@ -247,7 +247,7 @@ export async function GET(request: Request) {
           const date = new Date(startDate)
           date.setDate(startDate.getDate() + dayIndex)
 
-          const dayClasses = formattedClasses.filter(classItem => {
+          const dayClasses = formattedClasses.filter((classItem: any) => {
             const classDate = new Date(classItem.startsAt)
             return classDate.toDateString() === date.toDateString()
           })
@@ -281,8 +281,8 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Classes GET error:', error)
     console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
+      message: (error as Error).message,
+      stack: (error as Error).stack,
       view: new URL(request.url).searchParams.get('view'),
       week: new URL(request.url).searchParams.get('week')
     })

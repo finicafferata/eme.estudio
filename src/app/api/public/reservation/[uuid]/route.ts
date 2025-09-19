@@ -105,7 +105,7 @@ export async function GET(
     }, 0)
 
     // Find the next expiring package
-    const nextExpiration = userPackages.length > 0 && userPackages[0].expiresAt
+    const nextExpiration = userPackages.length > 0 && userPackages[0]?.expiresAt
       ? userPackages[0].expiresAt
       : null
 

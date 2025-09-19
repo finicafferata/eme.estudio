@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -132,11 +131,11 @@ function calculateStudentMetrics(student: any, startDate: Date, endDate: Date) {
   const reservations = student.reservations || []
 
   const totalReservations = reservations.length
-  const attendedClasses = reservations.filter(r =>
+  const attendedClasses = reservations.filter((r: any) =>
     r.status === 'CHECKED_IN' || r.status === 'COMPLETED'
   ).length
-  const noShows = reservations.filter(r => r.status === 'NO_SHOW').length
-  const cancelled = reservations.filter(r => r.status === 'CANCELLED').length
+  const noShows = reservations.filter((r: any) => r.status === 'NO_SHOW').length
+  const cancelled = reservations.filter((r: any) => r.status === 'CANCELLED').length
 
   const attendanceRate = totalReservations > 0 ? (attendedClasses / totalReservations) * 100 : 0
   const noShowRate = totalReservations > 0 ? (noShows / totalReservations) * 100 : 0
@@ -152,14 +151,14 @@ function calculateStudentMetrics(student: any, startDate: Date, endDate: Date) {
   const bookingFrequency = daysSinceFirstBooking > 0 ? (totalReservations / daysSinceFirstBooking) * 30 : 0
 
   // Calculate class type preferences
-  const classTypeStats = reservations.reduce((acc, reservation) => {
+  const classTypeStats = reservations.reduce((acc: Record<string, number>, reservation: any) => {
     const classType = reservation.class?.classType?.name || 'Unknown'
     acc[classType] = (acc[classType] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
   const favoriteClassType = Object.entries(classTypeStats)
-    .sort(([,a], [,b]) => b - a)[0]?.[0] || 'None'
+    .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'None'
 
   // Calculate engagement score (0-100)
   const engagementScore = calculateEngagementScore({
@@ -265,30 +264,30 @@ function calculateEngagementScore(metrics: {
 
 function getRecentActivityPattern(reservations: any[], days: number): any {
   const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-  const recentReservations = reservations.filter(r =>
+  const recentReservations = reservations.filter((r: any) =>
     new Date(r.reservedAt) >= cutoffDate
   )
 
   return {
     totalBookings: recentReservations.length,
-    attended: recentReservations.filter(r => r.status === 'CHECKED_IN' || r.status === 'COMPLETED').length,
-    noShows: recentReservations.filter(r => r.status === 'NO_SHOW').length,
-    cancelled: recentReservations.filter(r => r.status === 'CANCELLED').length,
+    attended: recentReservations.filter((r: any) => r.status === 'CHECKED_IN' || r.status === 'COMPLETED').length,
+    noShows: recentReservations.filter((r: any) => r.status === 'NO_SHOW').length,
+    cancelled: recentReservations.filter((r: any) => r.status === 'CANCELLED').length,
   }
 }
 
 function analyzePackageUsage(packages: any[]): any {
-  const activePackages = packages.filter(p => p.status === 'ACTIVE')
-  const expiredPackages = packages.filter(p => p.status === 'EXPIRED')
-  const usedUpPackages = packages.filter(p => p.status === 'USED_UP')
+  const activePackages = packages.filter((p: any) => p.status === 'ACTIVE')
+  const expiredPackages = packages.filter((p: any) => p.status === 'EXPIRED')
+  const usedUpPackages = packages.filter((p: any) => p.status === 'USED_UP')
 
   const totalPackages = packages.length
   const averageCreditsUsed = packages.length > 0
-    ? packages.reduce((sum, p) => sum + p.usedCredits, 0) / packages.length
+    ? packages.reduce((sum: number, p: any) => sum + p.usedCredits, 0) / packages.length
     : 0
 
   const averageCreditsTotal = packages.length > 0
-    ? packages.reduce((sum, p) => sum + p.totalCredits, 0) / packages.length
+    ? packages.reduce((sum: number, p: any) => sum + p.totalCredits, 0) / packages.length
     : 0
 
   const completionRate = averageCreditsTotal > 0
@@ -384,16 +383,16 @@ function calculatePackageCompletionAnalytics(students: any[]): any {
   }
 
   const totalPackages = allPackages.length
-  const completedPackages = allPackages.filter(p => p.status === 'USED_UP').length
-  const expiredPackages = allPackages.filter(p => p.status === 'EXPIRED').length
-  const activePackages = allPackages.filter(p => p.status === 'ACTIVE').length
+  const completedPackages = allPackages.filter((p: any) => p.status === 'USED_UP').length
+  const expiredPackages = allPackages.filter((p: any) => p.status === 'EXPIRED').length
+  const activePackages = allPackages.filter((p: any) => p.status === 'ACTIVE').length
 
-  const totalCreditsIssued = allPackages.reduce((sum, p) => sum + p.totalCredits, 0)
-  const totalCreditsUsed = allPackages.reduce((sum, p) => sum + p.usedCredits, 0)
+  const totalCreditsIssued = allPackages.reduce((sum: number, p: any) => sum + p.totalCredits, 0)
+  const totalCreditsUsed = allPackages.reduce((sum: number, p: any) => sum + p.usedCredits, 0)
   const averageCompletionRate = totalCreditsIssued > 0 ? (totalCreditsUsed / totalCreditsIssued) * 100 : 0
 
   // Analyze by class type
-  const packagesByClassType = allPackages.reduce((acc, pkg) => {
+  const packagesByClassType = allPackages.reduce((acc: any, pkg: any) => {
     const classType = pkg.classType?.name || 'Unknown'
 
     if (!acc[classType]) {

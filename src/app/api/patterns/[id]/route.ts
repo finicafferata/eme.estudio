@@ -28,7 +28,8 @@ export async function GET(
             id: true,
             name: true,
             description: true,
-            durationMinutes: true
+            durationMinutes: true,
+            defaultPrice: true
           }
         },
         instructor: {
@@ -97,7 +98,7 @@ export async function GET(
       durationMinutes: pattern.durationMinutes,
       endTime: new Date(new Date(`1970-01-01T${pattern.startTime.toTimeString().slice(0, 8)}`).getTime() + pattern.durationMinutes * 60000).toTimeString().slice(0, 5),
       capacity: pattern.capacity,
-      price: Number(pattern.price),
+      price: Number(pattern.classType.defaultPrice),
       isActive: pattern.isActive,
       validFrom: pattern.validFrom.toISOString().split('T')[0],
       validUntil: pattern.validUntil?.toISOString().split('T')[0],
@@ -239,7 +240,7 @@ export async function PUT(
       startTime: updatedPattern.startTime.toTimeString().slice(0, 5),
       durationMinutes: updatedPattern.durationMinutes,
       capacity: updatedPattern.capacity,
-      price: Number(updatedPattern.price),
+      price: Number(updatedPattern.classType.defaultPrice),
       isActive: updatedPattern.isActive,
       validFrom: updatedPattern.validFrom.toISOString().split('T')[0],
       validUntil: updatedPattern.validUntil?.toISOString().split('T')[0],

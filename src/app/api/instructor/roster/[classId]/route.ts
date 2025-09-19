@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -40,6 +39,7 @@ export async function GET(
             slug: true,
             description: true,
             durationMinutes: true,
+            defaultPrice: true,
           },
         },
         location: {
@@ -255,7 +255,7 @@ export async function GET(
         endsAt: classDetails.endsAt,
         status: classDetails.status,
         capacity: classDetails.capacity,
-        price: Number(classDetails.price),
+        price: Number(classDetails.classType.defaultPrice),
         location: classDetails.location,
         notes: classDetails.notes,
       },

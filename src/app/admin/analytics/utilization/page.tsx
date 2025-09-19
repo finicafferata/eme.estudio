@@ -240,7 +240,11 @@ export default function ClassUtilizationPage() {
               <div className="flex gap-2">
                 <DatePickerWithRange
                   date={dateRange}
-                  onDateChange={setDateRange}
+                  onDateChange={(date) => {
+                    if (date?.from && date?.to) {
+                      setDateRange({ from: date.from, to: date.to })
+                    }
+                  }}
                 />
                 <div className="flex gap-1">
                   <Button

@@ -35,8 +35,7 @@ export async function GET(request: NextRequest) {
             paidAt: true,
             status: true,
             paymentMethod: true,
-            createdAt: true,
-            notes: true
+            createdAt: true
           },
           orderBy: {
             createdAt: 'desc'
@@ -148,8 +147,7 @@ export async function GET(request: NextRequest) {
           status: payment.status,
           method: payment.paymentMethod,
           paidAt: payment.paidAt?.toISOString(),
-          createdAt: payment.createdAt.toISOString(),
-          notes: payment.notes
+          createdAt: payment.createdAt.toISOString()
         })),
 
         // Usage history (last 10 reservations)

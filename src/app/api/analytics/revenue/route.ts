@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -338,16 +337,28 @@ function calculatePaymentMethodAnalysis(payments: any[]) {
     if (!byClassType[classTypeName]) {
       byClassType[classTypeName] = {}
       paymentMethods.forEach(pm => {
-        byClassType[classTypeName][pm] = { count: 0, totalAmount: 0, percentage: 0 }
+        byClassType[classTypeName]![pm] = { count: 0, totalAmount: 0, percentage: 0 }
       })
     }
 
-    byClassType[classTypeName][method].count += 1
-    byClassType[classTypeName][method].totalAmount += amount
+    if (!byClassType[classTypeName]![method]) {
+      byClassType[classTypeName]![method] = { count: 0, totalAmount: 0, percentage: 0 }
+    }
+
+    byClassType[classTypeName]![method]!.count += 1
+    byClassType[classTypeName]![method]!.totalAmount += amount
 
     // Track overall
-    overall[method].count += 1
-    overall[method].totalAmount += amount
+    if (!overall[method]) {
+      overall[method] = {
+        method: formatPaymentMethod(method),
+        count: 0,
+        totalAmount: 0,
+        percentage: 0,
+      }
+    }
+    overall[method]!.count += 1
+    overall[method]!.totalAmount += amount
   })
 
   // Calculate percentages
@@ -356,21 +367,33 @@ function calculatePaymentMethodAnalysis(payments: any[]) {
   })
 
   Object.keys(byClassType).forEach(classType => {
-    const classTypeTotal = Object.values(byClassType[classType]).reduce((sum, method) => sum + method.totalAmount, 0)
-    Object.values(byClassType[classType]).forEach(method => {
+    const classTypeData = byClassType[classType]
+    if (!classTypeData) return
+
+    const classTypeTotal = Object.values(classTypeData).reduce((sum, method) => sum + method.totalAmount, 0)
+    Object.values(classTypeData).forEach(method => {
       method.percentage = classTypeTotal > 0 ? (method.totalAmount / classTypeTotal) * 100 : 0
     })
   })
 
   return {
     overall: Object.values(overall).sort((a, b) => b.totalAmount - a.totalAmount),
-    byClassType: Object.keys(byClassType).map(classType => ({
-      classType,
-      methods: Object.keys(byClassType[classType]).map(method => ({
-        method: formatPaymentMethod(method),
-        ...byClassType[classType][method],
-      })).sort((a, b) => b.totalAmount - a.totalAmount),
-    })),
+    byClassType: Object.keys(byClassType).map(classType => {
+      const classTypeData = byClassType[classType]
+      if (!classTypeData) return { classType, methods: [] }
+
+      return {
+        classType,
+        methods: Object.keys(classTypeData).map(method => {
+          const methodData = classTypeData[method]
+          if (!methodData) return { method: formatPaymentMethod(method), count: 0, totalAmount: 0, percentage: 0 }
+          return {
+            method: formatPaymentMethod(method),
+            ...methodData,
+          }
+        }).sort((a, b) => (b.totalAmount || 0) - (a.totalAmount || 0)),
+      }
+    }),
   }
 }
 
@@ -449,9 +472,11 @@ function calculateRevenueTrends(payments: any[]) {
     trend.monthlyAverage = trend.totalRevenue / 12
     if (index > 0) {
       const previousYear = sortedYears[index - 1]
-      trend.growth = previousYear.totalRevenue > 0
-        ? ((trend.totalRevenue - previousYear.totalRevenue) / previousYear.totalRevenue) * 100
-        : 0
+      if (previousYear) {
+        trend.growth = previousYear.totalRevenue > 0
+          ? ((trend.totalRevenue - previousYear.totalRevenue) / previousYear.totalRevenue) * 100
+          : 0
+      }
     }
   })
 
@@ -481,7 +506,7 @@ function calculateOverallMetrics(payments: any[]) {
   }, {} as Record<string, number>)
 
   const mostPopularPaymentMethod = Object.entries(paymentMethodCounts)
-    .sort(([,a], [,b]) => b - a)[0]?.[0] || 'Unknown'
+    .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'Unknown'
 
   return {
     totalRevenue,

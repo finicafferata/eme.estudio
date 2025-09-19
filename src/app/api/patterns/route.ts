@@ -18,7 +18,8 @@ export async function GET(request: Request) {
             id: true,
             name: true,
             description: true,
-            durationMinutes: true
+            durationMinutes: true,
+            defaultPrice: true
           }
         },
         instructor: {
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
       durationMinutes: pattern.durationMinutes,
       endTime: new Date(new Date(`1970-01-01T${pattern.startTime.toTimeString().slice(0, 8)}`).getTime() + pattern.durationMinutes * 60000).toTimeString().slice(0, 5),
       capacity: pattern.capacity,
-      price: Number(pattern.price),
+      price: Number(pattern.classType.defaultPrice),
       isActive: pattern.isActive,
       validFrom: pattern.validFrom.toISOString().split('T')[0],
       validUntil: pattern.validUntil?.toISOString().split('T')[0],
@@ -142,7 +143,6 @@ export async function POST(request: Request) {
         startTime: timeDate,
         durationMinutes: parseInt(durationMinutes),
         capacity: parseInt(capacity),
-        price: parseFloat(price),
         isActive: true,
         validFrom: new Date(validFrom),
         validUntil: validUntil ? new Date(validUntil) : null
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
           startTime: newPattern.startTime.toTimeString().slice(0, 5),
           durationMinutes: newPattern.durationMinutes,
           capacity: newPattern.capacity,
-          price: Number(newPattern.price),
+          price: Number(newPattern.classType.defaultPrice),
           isActive: newPattern.isActive,
           validFrom: newPattern.validFrom.toISOString().split('T')[0],
           validUntil: newPattern.validUntil?.toISOString().split('T')[0],
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
         startTime: newPattern.startTime.toTimeString().slice(0, 5),
         durationMinutes: newPattern.durationMinutes,
         capacity: newPattern.capacity,
-        price: Number(newPattern.price),
+        price: Number(newPattern.classType.defaultPrice),
         isActive: newPattern.isActive,
         validFrom: newPattern.validFrom.toISOString().split('T')[0],
         validUntil: newPattern.validUntil?.toISOString().split('T')[0],
@@ -310,7 +310,6 @@ async function generateClassesFromPattern(
         startsAt: classStartTime,
         endsAt: classEndTime,
         capacity: pattern.capacity,
-        price: pattern.price,
         status: ClassStatus.SCHEDULED,
         notes: `Generated from pattern: ${pattern.name}`
       }

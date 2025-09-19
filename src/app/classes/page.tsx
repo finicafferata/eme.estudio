@@ -340,7 +340,7 @@ export default function PublicClassesPage() {
           groupedClasses.map(([date, dayClasses]) => (
             <Card key={date}>
               <CardHeader>
-                <CardTitle>{formatDate(dayClasses[0].startsAt)}</CardTitle>
+                <CardTitle>{dayClasses[0] ? formatDate(dayClasses[0].startsAt) : 'No classes'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">

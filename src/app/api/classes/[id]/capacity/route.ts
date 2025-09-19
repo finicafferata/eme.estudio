@@ -241,7 +241,7 @@ export async function GET(request: Request, context: RouteContext) {
         currentCapacity + waitlistCount,
         constraints.maximumCapacity
       ),
-      potentialRevenue: waitlistCount * Number(classData.price)
+      potentialRevenue: waitlistCount * Number(classData.classType.defaultPrice)
     }
 
     return NextResponse.json({

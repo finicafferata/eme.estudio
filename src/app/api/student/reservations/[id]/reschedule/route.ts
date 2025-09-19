@@ -245,7 +245,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       reschedule: {
         oldReservationId: params.id,
         newReservationId: result.newReservation.id.toString(),
-        oldClassName: result.cancelledReservation.class?.classType.name,
         creditTransferred: !!result.cancelledReservation.packageId
       },
       newClass: {

@@ -80,7 +80,7 @@ export async function GET(request: Request, context: RouteContext) {
         endsAt: reservation.class.endsAt.toISOString(),
         capacity: reservation.class.capacity,
         status: reservation.class.status,
-        price: Number(reservation.class.price),
+        price: Number(reservation.class.classType.defaultPrice),
         location: {
           name: reservation.class.location.name,
           address: reservation.class.location.address

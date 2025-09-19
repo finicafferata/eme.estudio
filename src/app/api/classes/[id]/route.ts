@@ -309,7 +309,7 @@ export async function PUT(
       startsAt: updatedClass.startsAt.toISOString(),
       endsAt: updatedClass.endsAt.toISOString(),
       capacity: updatedClass.capacity,
-      price: Number(updatedClass.price),
+      price: Number(updatedClass.classType.defaultPrice),
       status: updatedClass.status,
       notes: updatedClass.notes,
       updatedAt: updatedClass.updatedAt.toISOString(),

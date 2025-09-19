@@ -86,7 +86,8 @@ export async function GET(request: NextRequest) {
             name: true,
             slug: true,
             description: true,
-            durationMinutes: true
+            durationMinutes: true,
+            defaultPrice: true
           }
         },
         instructor: {
@@ -174,7 +175,7 @@ export async function GET(request: NextRequest) {
         startsAt: classItem.startsAt.toISOString(),
         endsAt: classItem.endsAt.toISOString(),
         capacity: classItem.capacity,
-        price: Number(classItem.price),
+        price: Number(classItem.classType.defaultPrice),
         status: classItem.status,
         notes: classItem.notes,
 

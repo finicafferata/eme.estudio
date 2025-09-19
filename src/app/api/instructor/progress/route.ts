@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -131,7 +130,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -234,24 +233,24 @@ export async function GET(request: NextRequest) {
 
       // Calculate student's skill progression
       const skillLevels = studentProgress
-        .map(note => note.progressData.skillLevel)
+        .map((note: any) => note.progressData.skillLevel)
         .filter(level => level)
 
       const techniques = studentProgress
-        .flatMap(note => note.progressData.techniquesLearned || [])
-        .filter((technique, index, arr) => arr.indexOf(technique) === index)
+        .flatMap((note: any) => note.progressData.techniquesLearned || [])
+        .filter((technique: any, index: number, arr: any[]) => arr.indexOf(technique) === index)
 
       const commonImprovementAreas = studentProgress
-        .flatMap(note => note.progressData.areasToImprove || [])
+        .flatMap((note: any) => note.progressData.areasToImprove || [])
         .reduce((acc: any, area: string) => {
           acc[area] = (acc[area] || 0) + 1
           return acc
         }, {})
 
       const averageRating = studentProgress
-        .map(note => note.progressData.classRating)
-        .filter(rating => rating !== null && rating !== undefined)
-        .reduce((sum, rating, _, arr) => {
+        .map((note: any) => note.progressData.classRating)
+        .filter((rating: any) => rating !== null && rating !== undefined)
+        .reduce((sum: number, rating: number, _: number, arr: number[]) => {
           if (arr.length === 0) return 0
           return arr.length === 1 ? rating : sum + rating / arr.length
         }, 0)
@@ -286,7 +285,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id || session.user.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -164,7 +164,6 @@ async function generateClassesFromPattern(
         startsAt: classStartTime,
         endsAt: classEndTime,
         capacity: pattern.capacity,
-        price: pattern.price,
         status: ClassStatus.SCHEDULED,
         notes: `Generated from pattern: ${pattern.name}`
       }

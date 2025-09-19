@@ -62,22 +62,27 @@ export async function POST(
       }
     })
 
-    // Log the activation
-    await prisma.auditLog.create({
-      data: {
-        userId: BigInt((session.user as any).id),
-        action: 'USER_ACTIVATED',
-        entityType: 'User',
-        entityId: user.id.toString(),
-        details: {
-          activatedUserId: user.id.toString(),
-          activatedUserEmail: user.email,
-          activatedUserName: `${user.firstName} ${user.lastName}`,
-          previousStatus: UserStatus.PENDING_ACTIVATION,
-          newStatus: UserStatus.ACTIVE
+    // Log the activation using correct schema fields
+    try {
+      await prisma.auditLog.create({
+        data: {
+          userId: BigInt((session.user as any).id),
+          action: 'USER_ACTIVATED',
+          tableName: 'users',
+          recordId: user.id,
+          newValues: {
+            activatedUserId: user.id.toString(),
+            activatedUserEmail: user.email,
+            activatedUserName: `${user.firstName} ${user.lastName}`,
+            previousStatus: UserStatus.PENDING_ACTIVATION,
+            newStatus: UserStatus.ACTIVE
+          }
         }
-      }
-    })
+      })
+    } catch (auditError) {
+      // Continue even if audit log fails
+      console.warn('Failed to create audit log:', auditError)
+    }
 
     return NextResponse.json({
       message: 'Usuario activado exitosamente',

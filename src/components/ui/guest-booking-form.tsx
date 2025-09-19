@@ -224,7 +224,7 @@ export default function GuestBookingForm({ classData, onSuccess, onCancel }: Gue
             <div><strong>Class:</strong> {bookingResult.class.name}</div>
             <div><strong>Date & Time:</strong> {new Date(bookingResult.class.startsAt).toLocaleDateString()} at {new Date(bookingResult.class.startsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
             <div><strong>Location:</strong> {bookingResult.class.location.name}</div>
-            <div><strong>Frame Size:</strong> {frameSizeLabels[bookingResult.frameSize]}</div>
+            <div><strong>Frame Size:</strong> {frameSizeLabels[bookingResult.frameSize as FrameSize]}</div>
           </div>
         </div>
 
@@ -358,7 +358,7 @@ export default function GuestBookingForm({ classData, onSuccess, onCancel }: Gue
           <Checkbox
             id="saveToStorage"
             checked={saveToStorage}
-            onCheckedChange={setSaveToStorage}
+            onCheckedChange={(checked) => setSaveToStorage(checked === true)}
           />
           <Label htmlFor="saveToStorage" className="text-sm">
             Remember my information for future bookings
@@ -370,7 +370,7 @@ export default function GuestBookingForm({ classData, onSuccess, onCancel }: Gue
             <Checkbox
               id="clearStorage"
               checked={clearStorageData}
-              onCheckedChange={setClearStorageData}
+              onCheckedChange={(checked) => setClearStorageData(checked === true)}
             />
             <Label htmlFor="clearStorage" className="text-sm">
               Clear saved information after booking

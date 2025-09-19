@@ -118,7 +118,16 @@ export default function StudentCreditsPage() {
     averageCostPerCredit: 0,
     activePackagesCount: 0,
     expiredPackagesCount: 0,
-    expiringPackagesCount: 0
+    expiringPackagesCount: 0,
+    usedUpPackagesCount: 0,
+    totalPackageValue: 0,
+    usedValue: 0,
+    remainingValue: 0,
+    valueUtilizationRate: 0,
+    fullyPaidPackages: 0,
+    pendingPaymentPackages: 0,
+    expiredUnusedCredits: 0,
+    expiredUnusedValue: 0
   })
   const [alerts, setAlerts] = useState<Alerts>({ expiringPackages: [], expiredPackages: [] })
   const [recommendations, setRecommendations] = useState<string[]>([])

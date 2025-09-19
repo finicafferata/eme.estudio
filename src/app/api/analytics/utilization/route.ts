@@ -188,9 +188,11 @@ function calculateTimeSlotUtilization(classes: any[]) {
   // Calculate averages
   Object.keys(slots).forEach(timeSlot => {
     const slot = slots[timeSlot]
-    slot.averageUtilization = slot.totalCapacity > 0
-      ? (slot.totalBooked / slot.totalCapacity) * 100
-      : 0
+    if (slot) {
+      slot.averageUtilization = slot.totalCapacity > 0
+        ? (slot.totalBooked / slot.totalCapacity) * 100
+        : 0
+    }
   })
 
   // Sort by time
@@ -227,6 +229,8 @@ function calculateDayOfWeekPatterns(classes: any[]) {
 
   classes.forEach(classItem => {
     const dayOfWeek = days[new Date(classItem.startsAt).getDay()]
+    if (!dayOfWeek) return // Skip if invalid day
+
     const hour = new Date(classItem.startsAt).getHours()
     const timeSlot = `${hour.toString().padStart(2, '0')}:00`
 
@@ -235,22 +239,24 @@ function calculateDayOfWeekPatterns(classes: any[]) {
       r.status === ReservationStatus.CHECKED_IN
     )
 
-    patterns[dayOfWeek].totalClasses++
-    patterns[dayOfWeek].totalCapacity += classItem.capacity
-    patterns[dayOfWeek].totalBooked += confirmedReservations.length
+    patterns[dayOfWeek]!.totalClasses++
+    patterns[dayOfWeek]!.totalCapacity += classItem.capacity
+    patterns[dayOfWeek]!.totalBooked += confirmedReservations.length
 
-    if (!patterns[dayOfWeek].popularTimes[timeSlot]) {
-      patterns[dayOfWeek].popularTimes[timeSlot] = 0
+    if (!patterns[dayOfWeek]!.popularTimes[timeSlot]) {
+      patterns[dayOfWeek]!.popularTimes[timeSlot] = 0
     }
-    patterns[dayOfWeek].popularTimes[timeSlot] += confirmedReservations.length
+    patterns[dayOfWeek]!.popularTimes[timeSlot] += confirmedReservations.length
   })
 
   // Calculate averages and find most popular times
   Object.keys(patterns).forEach(day => {
     const pattern = patterns[day]
-    pattern.averageUtilization = pattern.totalCapacity > 0
-      ? (pattern.totalBooked / pattern.totalCapacity) * 100
-      : 0
+    if (pattern) {
+      pattern.averageUtilization = pattern.totalCapacity > 0
+        ? (pattern.totalBooked / pattern.totalCapacity) * 100
+        : 0
+    }
   })
 
   return Object.entries(patterns).map(([day, data]) => ({
@@ -315,9 +321,11 @@ function calculateInstructorPerformance(classes: any[]) {
   // Calculate averages
   Object.keys(instructors).forEach(id => {
     const instructor = instructors[id]
-    instructor.averageUtilization = instructor.totalCapacity > 0
-      ? (instructor.totalBooked / instructor.totalCapacity) * 100
-      : 0
+    if (instructor) {
+      instructor.averageUtilization = instructor.totalCapacity > 0
+        ? (instructor.totalBooked / instructor.totalCapacity) * 100
+        : 0
+    }
   })
 
   return Object.entries(instructors)
@@ -420,7 +428,7 @@ async function calculateNoShowStats(startDate: Date, endDate: Date) {
     byStudent: Object.values(studentNoShows).sort((a, b) => b.count - a.count),
     byTimeSlot: Object.entries(timeSlotNoShows)
       .map(([time, count]) => ({ time, count }))
-      .sort(([,a], [,b]) => b - a)
+      .sort((a, b) => b.count - a.count)
   }
 }
 
@@ -464,8 +472,10 @@ function calculateRevenueMetrics(classes: any[]) {
 
       // By day of week
       const dayOfWeek = days[new Date(classItem.startsAt).getDay()]
-      if (!revenueByDay[dayOfWeek]) revenueByDay[dayOfWeek] = 0
-      revenueByDay[dayOfWeek] += classRevenue
+      if (dayOfWeek) {
+        if (!revenueByDay[dayOfWeek]) revenueByDay[dayOfWeek] = 0
+        revenueByDay[dayOfWeek] += classRevenue
+      }
     }
   })
 
@@ -475,7 +485,7 @@ function calculateRevenueMetrics(classes: any[]) {
     byType: Object.entries(revenueByType).map(([type, revenue]) => ({ type, revenue })),
     byTimeSlot: Object.entries(revenueByTimeSlot)
       .map(([time, revenue]) => ({ time, revenue }))
-      .sort(([a], [b]) => a.localeCompare(b)),
+      .sort((a, b) => a.time.localeCompare(b.time)),
     byDayOfWeek: Object.entries(revenueByDay).map(([day, revenue]) => ({ day, revenue }))
   }
 }

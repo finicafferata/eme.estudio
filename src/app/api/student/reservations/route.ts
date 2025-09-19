@@ -58,7 +58,8 @@ export async function GET(request: NextRequest) {
                 id: true,
                 name: true,
                 description: true,
-                durationMinutes: true
+                durationMinutes: true,
+                defaultPrice: true
               }
             },
             instructor: {
@@ -115,7 +116,7 @@ export async function GET(request: NextRequest) {
         startsAt: reservation.class.startsAt.toISOString(),
         endsAt: reservation.class.endsAt.toISOString(),
         capacity: reservation.class.capacity,
-        price: Number(reservation.class.price),
+        price: Number(reservation.class.classType.defaultPrice),
         status: reservation.class.status,
         notes: reservation.class.notes,
 
