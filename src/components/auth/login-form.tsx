@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react'
@@ -10,7 +10,7 @@ interface LoginFormProps {
   className?: string
 }
 
-export function LoginForm({ className }: LoginFormProps) {
+function LoginFormContent({ className }: LoginFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
@@ -149,5 +149,17 @@ export function LoginForm({ className }: LoginFormProps) {
         </a>
       </div>
     </div>
+  )
+}
+
+export function LoginForm({ className }: LoginFormProps) {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <LoginFormContent className={className} />
+    </Suspense>
   )
 }

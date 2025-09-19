@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -72,7 +72,7 @@ interface ReservationDetails {
   }
 }
 
-export default function BookingConfirmationPage() {
+function BookingConfirmationContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reservationId = searchParams.get('reservation')
@@ -403,5 +403,19 @@ export default function BookingConfirmationPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function BookingConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    }>
+      <BookingConfirmationContent />
+    </Suspense>
   )
 }
