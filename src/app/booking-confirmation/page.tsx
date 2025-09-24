@@ -215,7 +215,7 @@ function BookingConfirmationContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button
@@ -230,15 +230,15 @@ function BookingConfirmationContent() {
 
       {/* Success Header */}
       <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-8 text-center">
-          <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-          <h1 className="text-3xl font-bold mb-2">¡Reserva Confirmada!</h1>
-          <p className="text-xl text-muted-foreground mb-4">
+        <CardContent className="p-6 sm:p-8 text-center">
+          <CheckCircle className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-green-500 mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">¡Reserva Confirmada!</h1>
+          <p className="text-lg sm:text-xl text-muted-foreground mb-4">
             Tu clase ha sido reservada exitosamente
           </p>
-          <Badge variant="secondary" className="text-lg px-4 py-2">
-            Reserva: {reservation.uuid}
-          </Badge>
+          <div className="text-sm text-muted-foreground">
+            ID de reserva: {reservation.uuid.split('-')[0].toUpperCase()}
+          </div>
         </CardContent>
       </Card>
 
@@ -318,7 +318,7 @@ function BookingConfirmationContent() {
         </Alert>
       )}
 
-      <div className="max-w-4xl mx-auto grid gap-6 md:grid-cols-2">
+      <div className="max-w-4xl mx-auto grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Class Details */}
         <Card>
           <CardHeader>
@@ -443,7 +443,7 @@ function BookingConfirmationContent() {
           <CardTitle>¿Qué sigue?</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {reservation.nextSteps.checkEmail && (
               <Alert>
                 <Mail className="h-4 w-4" />
@@ -478,15 +478,15 @@ function BookingConfirmationContent() {
       </Card>
 
       {/* Action Buttons */}
-      <div className="max-w-4xl mx-auto flex justify-center space-x-4">
-        <Button onClick={() => router.push('/clases')}>
+      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+        <Button onClick={() => router.push('/clases')} className="w-full sm:w-auto">
           Reservar Otra Clase
         </Button>
-        <Button variant="outline" onClick={() => router.push('/')}>
+        <Button variant="outline" onClick={() => router.push('/')} className="w-full sm:w-auto">
           Ir al Inicio
         </Button>
         {reservation.user.needsActivation && (
-          <Button variant="outline" onClick={() => router.push('/login')}>
+          <Button variant="outline" onClick={() => router.push('/login')} className="w-full sm:w-auto">
             Iniciar Sesión
           </Button>
         )}
@@ -494,10 +494,11 @@ function BookingConfirmationContent() {
 
       {/* Studio Contact Info */}
       <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-6 text-center text-sm text-muted-foreground">
+        <CardContent className="p-4 sm:p-6 text-center text-sm text-muted-foreground">
           <p className="mb-2">¿Tenés preguntas sobre tu reserva?</p>
-          <p>EME Estudio - José Penna 989, San Isidro</p>
-          <p>info@emeestudio.com | WhatsApp: +54 9 11 1234-5678</p>
+          <p className="mb-1">EME Estudio - José Penna 989, San Isidro</p>
+          <p className="mb-1">info@emeestudio.com</p>
+          <p className="mb-2">WhatsApp: +54 9 11 1234-5678</p>
           <p className="mt-2">Seguinos en redes sociales para novedades y anuncios</p>
         </CardContent>
       </Card>
