@@ -125,7 +125,9 @@ export async function GET(request: NextRequest) {
     const paymentStats = await prisma.reservation.findMany({
       where: {
         status: ReservationStatus.CONFIRMED,
-        paymentDeadline: { not: null },
+        NOT: {
+          paymentDeadline: null
+        },
         packageId: null
       },
       select: {
