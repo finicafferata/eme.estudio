@@ -724,7 +724,7 @@ export default function PackagesPage() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold text-green-600">
-                      {selectedPackage.classHistory?.filter(reservation =>
+                      {selectedPackage.classHistory?.filter((reservation: any) =>
                         reservation.status === 'CHECKED_IN' || reservation.status === 'COMPLETED'
                       ).length || 0}
                     </div>

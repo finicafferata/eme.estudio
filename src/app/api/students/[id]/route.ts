@@ -22,7 +22,7 @@ export async function GET(
 
     const student = await prisma.user.findUnique({
       where: {
-        id: studentId,
+        id: studentId as bigint,
         role: UserRole.STUDENT
       },
       include: {
@@ -217,7 +217,7 @@ export async function PUT(
     // Check if student exists
     const existingStudent = await prisma.user.findUnique({
       where: {
-        id: studentId,
+        id: studentId as bigint,
         role: UserRole.STUDENT
       }
     })
@@ -241,7 +241,7 @@ export async function PUT(
     }
 
     const updatedStudent = await prisma.user.update({
-      where: { id: studentId },
+      where: { id: studentId as bigint },
       data: {
         firstName,
         lastName,
@@ -324,7 +324,7 @@ export async function PUT(
     console.error('Student PUT error:', error)
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      studentId,
+      studentId: studentId?.toString() || 'unknown',
       updatedData: { firstName, lastName, email, phone, instagram, notes, status }
     })
     return NextResponse.json(
@@ -354,7 +354,7 @@ export async function DELETE(
     // Check if student exists and has no active packages or pending payments
     const student = await prisma.user.findUnique({
       where: {
-        id: studentId,
+        id: studentId as bigint,
         role: UserRole.STUDENT
       },
       include: {
@@ -405,7 +405,7 @@ export async function DELETE(
 
     // Soft delete - change status to INACTIVE instead of actual deletion
     await prisma.user.update({
-      where: { id: studentId },
+      where: { id: studentId as bigint },
       data: {
         status: UserStatus.INACTIVE,
         email: `deleted_${Date.now()}_${student.email}` // Prevent email conflicts

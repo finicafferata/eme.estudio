@@ -237,7 +237,7 @@ function BookingConfirmationContent() {
             Tu clase ha sido reservada exitosamente
           </p>
           <div className="text-sm text-muted-foreground">
-            ID de reserva: {reservation.uuid.split('-')[0].toUpperCase()}
+            ID de reserva: {reservation.uuid?.split('-')[0]?.toUpperCase() || 'N/A'}
           </div>
         </CardContent>
       </Card>
@@ -265,7 +265,7 @@ function BookingConfirmationContent() {
 
       {needsPayment() && (
         <Alert
-          variant={isUrgentPayment() ? "destructive" : "warning"}
+          variant={isUrgentPayment() ? "destructive" : "default"}
           className={`max-w-4xl mx-auto ${isUrgentPayment() ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}
         >
           <AlertTriangle className={`h-4 w-4 ${isUrgentPayment() ? 'text-red-600' : 'text-yellow-600'}`} />

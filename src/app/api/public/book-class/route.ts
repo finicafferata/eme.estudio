@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { UserStatus, UserRole, ReservationStatus, PaymentStatus, PaymentMethod, FrameSize, RegistrationType } from '@prisma/client'
+import { UserStatus, UserRole, ReservationStatus, PaymentStatus, PaymentMethod, FrameSize, RegistrationType, PackageStatus } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
+import { emailService, formatBookingForEmail } from '@/lib/email'
 
 interface GuestBookingRequest {
   classId: string
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
         where: { id: BigInt(packageId) }
       })
 
-      if (pkg && pkg.userId === user.id && pkg.status === 'ACTIVE') {
+      if (pkg && pkg.userId === user.id && pkg.status === PackageStatus.ACTIVE) {
         const availableCredits = pkg.totalCredits - pkg.usedCredits
         if (availableCredits > 0) {
           // Update package credits
@@ -205,7 +206,7 @@ export async function POST(request: NextRequest) {
             where: { id: BigInt(packageId) },
             data: {
               usedCredits: pkg.usedCredits + 1,
-              status: (pkg.usedCredits + 1 >= pkg.totalCredits) ? 'USED_UP' : 'ACTIVE'
+              status: (pkg.usedCredits + 1 >= pkg.totalCredits) ? PackageStatus.USED_UP : PackageStatus.ACTIVE
             }
           })
           usedPackage = true
@@ -248,7 +249,7 @@ export async function POST(request: NextRequest) {
             totalCredits: 3,
             usedCredits: 1, // Already used for this reservation
             price: 0, // Price will be set manually by admin
-            status: 'PENDING_PAYMENT',
+            status: PackageStatus.PENDING_PAYMENT,
             purchasedAt: new Date(),
             metadata: {
               bookingType: 'guest-intensive-package',
@@ -269,7 +270,7 @@ export async function POST(request: NextRequest) {
             totalCredits: 8,
             usedCredits: 1, // Already used for this reservation
             price: 0, // Price will be set manually by admin
-            status: 'PENDING_PAYMENT',
+            status: PackageStatus.PENDING_PAYMENT,
             purchasedAt: new Date(),
             metadata: {
               bookingType: 'guest-recurrent-package',
@@ -290,7 +291,7 @@ export async function POST(request: NextRequest) {
             totalCredits: 1,
             usedCredits: 1, // Already used for this reservation
             price: 0, // Single classes are free
-            status: 'ACTIVE', // Single classes are automatically active (free)
+            status: PackageStatus.ACTIVE, // Single classes are automatically active (free)
             purchasedAt: new Date(),
             metadata: {
               bookingType: 'guest-single-class-free',
@@ -377,8 +378,8 @@ export async function POST(request: NextRequest) {
         remainingCredits: createdPackage.totalCredits - createdPackage.usedCredits,
         status: createdPackage.status,
         price: Number(createdPackage.price),
-        requiresPayment: createdPackage.status === 'PENDING_PAYMENT',
-        isFree: createdPackage.price === 0 && createdPackage.status === 'ACTIVE'
+        requiresPayment: createdPackage.status === PackageStatus.PENDING_PAYMENT,
+        isFree: Number(createdPackage.price) === 0 && createdPackage.status === PackageStatus.ACTIVE
       } : null,
       registrationType: registrationType || null,
       usedPackage,
@@ -387,9 +388,9 @@ export async function POST(request: NextRequest) {
         checkEmail: true,
         arriveEarly: true,
         activateAccount: userCreated,
-        paymentRequired: createdPackage ? createdPackage.status === 'PENDING_PAYMENT' : false
+        paymentRequired: createdPackage ? createdPackage.status === PackageStatus.PENDING_PAYMENT : false
       },
-      paymentInstructions: createdPackage && createdPackage.status === 'PENDING_PAYMENT' ? {
+      paymentInstructions: createdPackage && createdPackage.status === PackageStatus.PENDING_PAYMENT ? {
         message: registrationType === 'INTENSIVE'
           ? "Tu paquete intensivo requiere pago. El estudio se contactará contigo para coordinar el pago."
           : registrationType === 'RECURRENT'
@@ -399,8 +400,42 @@ export async function POST(request: NextRequest) {
       } : null
     }
 
-    // TODO: Send confirmation email (implement in next task)
-    // await sendBookingConfirmationEmail(user, classItem, reservation, payment)
+    // Send confirmation email
+    try {
+      // Get the full reservation data with all necessary relations for email
+      const reservationForEmail = await prisma.reservation.findUnique({
+        where: { id: reservation.id },
+        include: {
+          user: true,
+          class: {
+            include: {
+              classType: true,
+              location: true,
+              instructor: {
+                include: {
+                  user: true
+                }
+              }
+            }
+          },
+          package: true
+        }
+      })
+
+      if (reservationForEmail) {
+        const emailData = formatBookingForEmail(reservationForEmail)
+        const emailSent = await emailService.sendBookingConfirmation(emailData)
+
+        if (emailSent) {
+          console.log('✅ Confirmation email sent successfully to:', user.email)
+        } else {
+          console.warn('⚠️ Failed to send confirmation email to:', user.email)
+        }
+      }
+    } catch (emailError) {
+      console.error('Email sending error:', emailError)
+      // Don't fail the booking if email fails
+    }
 
     return NextResponse.json(responseData, { status: 201 })
 

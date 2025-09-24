@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
     const upcomingDeadlines = await findUpcomingPaymentDeadlines(now)
 
     const reminderResults = {
-      sent48h: [],
-      sent24h: [],
-      sent6h: [],
-      failed: []
+      sent48h: [] as string[],
+      sent24h: [] as string[],
+      sent6h: [] as string[],
+      failed: [] as any[]
     }
 
     // Process 48-hour reminders

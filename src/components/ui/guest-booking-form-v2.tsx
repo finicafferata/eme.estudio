@@ -605,7 +605,7 @@ export default function GuestBookingFormV2({ classData, onSuccess, onCancel }: G
             <p className="text-sm text-muted-foreground">
               {registrationType === 'INTENSIVE' ? t('intensiveCourse') : t('recurrentCourse')}
             </p>
-            {userPackageInfo?.autoSelectType && (
+            {(userPackageInfo as any)?.autoSelectType && (
               <Badge variant="secondary" className="text-xs">
                 {t('yourUsualType')}
               </Badge>
@@ -725,13 +725,13 @@ export default function GuestBookingFormV2({ classData, onSuccess, onCancel }: G
         <div className="flex space-x-3">
           <Button type="button" variant="outline" onClick={() => {
             // If auto-selected, allow changing the type
-            if (userPackageInfo?.autoSelectType) {
+            if ((userPackageInfo as any)?.autoSelectType) {
               setStage('registration')
             } else {
               setStage('email')
             }
           }}>
-            {userPackageInfo?.autoSelectType ? t('changeType') : t('back')}
+            {(userPackageInfo as any)?.autoSelectType ? t('changeType') : t('back')}
           </Button>
           <Button type="submit" className="flex-1">
             {t('reviewBooking')}

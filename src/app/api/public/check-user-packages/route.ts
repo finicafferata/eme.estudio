@@ -146,10 +146,10 @@ export async function POST(request: NextRequest) {
       } else if (typeCounts['INTENSIVE'] && !typeCounts['RECURRENT']) {
         preferredType = 'INTENSIVE'
         autoSelectType = true
-      } else if (typeCounts['RECURRENT'] > (typeCounts['INTENSIVE'] || 0)) {
+      } else if ((typeCounts['RECURRENT'] || 0) > (typeCounts['INTENSIVE'] || 0)) {
         preferredType = 'RECURRENT'
         autoSelectType = true
-      } else if (typeCounts['INTENSIVE'] > (typeCounts['RECURRENT'] || 0)) {
+      } else if ((typeCounts['INTENSIVE'] || 0) > (typeCounts['RECURRENT'] || 0)) {
         preferredType = 'INTENSIVE'
         autoSelectType = true
       }
