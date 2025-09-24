@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -77,10 +78,15 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
     <div className={cn('flex h-full w-64 flex-col bg-white border-r border-gray-200', className)}>
       {/* Logo and Brand */}
       <div className="flex h-16 items-center justify-center px-6 border-b border-gray-200">
-        <Link href="/admin/dashboard" className="flex items-center space-x-2">
+        <Link href="/admin/dashboard" className="flex items-center space-x-3">
           <div className="relative">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <div className="absolute -top-1 -right-1 h-3 w-3 bg-secondary rounded-full"></div>
+            <Image
+              src="/images/eme-logo.png"
+              alt="EME Studio Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-bold text-gray-900">EME</span>
@@ -141,8 +147,14 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       {/* Studio Info Footer */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center p-1">
+            <Image
+              src="/images/eme-logo.png"
+              alt="EME Studio Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">

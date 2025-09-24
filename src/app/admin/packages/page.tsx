@@ -117,13 +117,22 @@ export default function PackagesPage() {
   // Modal states
   const [showDetails, setShowDetails] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   // Form state for creating packages
   const [createForm, setCreateForm] = useState({
     studentId: '',
     packageType: 'INTENSIVO',
     paymentAmount: '',
-    paymentMethod: 'cash',
+    paymentMethod: 'CASH_PESOS',
+    notes: ''
+  })
+
+  // Form state for recording payments
+  const [paymentForm, setPaymentForm] = useState({
+    packageId: '',
+    amount: 0,
+    paymentMethod: 'CASH_PESOS',
     notes: ''
   })
 
@@ -214,13 +223,50 @@ export default function PackagesPage() {
         studentId: '',
         packageType: 'INTENSIVO',
         paymentAmount: '',
-        paymentMethod: 'cash',
+        paymentMethod: 'CASH_PESOS',
         notes: ''
       })
       fetchPackages()
       fetchPackageStats()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create package')
+    }
+  }
+
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/admin/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packageId: paymentForm.packageId,
+          amount: paymentForm.amount,
+          paymentMethod: paymentForm.paymentMethod,
+          notes: paymentForm.notes,
+          userId: selectedPackage?.student.id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to record payment')
+      }
+
+      // Close payment modal and refresh data
+      setShowPaymentModal(false)
+
+      // Reset payment form
+      setPaymentForm({
+        packageId: '',
+        amount: 0,
+        paymentMethod: 'CASH_PESOS',
+        notes: ''
+      })
+
+      // Refresh packages data
+      await fetchPackages()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to record payment')
     }
   }
 
@@ -274,6 +320,16 @@ export default function PackagesPage() {
     fetchPackageStats()
     fetchStudents()
   }, [])
+
+  // Update selected package when packages data changes
+  useEffect(() => {
+    if (selectedPackage && packages.length > 0) {
+      const updatedPackage = packages.find(p => p.id === selectedPackage.id)
+      if (updatedPackage) {
+        setSelectedPackage(updatedPackage)
+      }
+    }
+  }, [packages, selectedPackage])
 
   if (error) {
     return (
@@ -366,10 +422,11 @@ export default function PackagesPage() {
                   onChange={(e) => setCreateForm({ ...createForm, paymentMethod: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="cash">Efectivo</option>
-                  <option value="transfer">Transferencia</option>
-                  <option value="card">Tarjeta</option>
-                  <option value="mercadopago">Mercado Pago</option>
+                  <option value="CASH_PESOS">Efectivo (Pesos)</option>
+                  <option value="CASH_USD">Efectivo (USD)</option>
+                  <option value="TRANSFER_TO_MERI_PESOS">Transferencia a Meri (Pesos)</option>
+                  <option value="TRANSFER_TO_MALE_PESOS">Transferencia a Male (Pesos)</option>
+                  <option value="TRANSFER_IN_USD">Transferencia (USD)</option>
                 </select>
               </div>
 
@@ -667,7 +724,9 @@ export default function PackagesPage() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold text-green-600">
-                      {selectedPackage.classStats.attendedClasses}
+                      {selectedPackage.classHistory?.filter(reservation =>
+                        reservation.status === 'CHECKED_IN' || reservation.status === 'COMPLETED'
+                      ).length || 0}
                     </div>
                     <p className="text-sm text-gray-600">Clases Asistidas</p>
                   </CardContent>
@@ -692,8 +751,24 @@ export default function PackagesPage() {
 
               {/* Payment Information */}
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Información de Pagos</CardTitle>
+                  <Button
+                    onClick={() => {
+                      setShowPaymentModal(true);
+                      setPaymentForm({
+                        packageId: selectedPackage.id,
+                        amount: selectedPackage.payments.totalDue,
+                        paymentMethod: 'CASH_PESOS',
+                        notes: ''
+                      });
+                    }}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Registrar Pago
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -744,6 +819,69 @@ export default function PackagesPage() {
               </Card>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Recording Modal */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registrar Pago</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePaymentSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Monto a Pagar</label>
+              <Input
+                type="number"
+                value={paymentForm.amount}
+                onChange={(e) => setPaymentForm({ ...paymentForm, amount: parseFloat(e.target.value) })}
+                placeholder="Ingrese el monto..."
+                required
+                className="mt-1"
+              />
+              {selectedPackage && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Saldo pendiente: {formatCurrency(selectedPackage.payments.totalDue)}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Método de Pago</label>
+              <select
+                value={paymentForm.paymentMethod}
+                onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mt-1"
+                required
+              >
+                <option value="CASH_PESOS">Efectivo (Pesos)</option>
+                <option value="CASH_USD">Efectivo (USD)</option>
+                <option value="TRANSFER_TO_MERI_PESOS">Transferencia a Meri (Pesos)</option>
+                <option value="TRANSFER_TO_MALE_PESOS">Transferencia a Male (Pesos)</option>
+                <option value="TRANSFER_IN_USD">Transferencia (USD)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Notas (Opcional)</label>
+              <Input
+                value={paymentForm.notes}
+                onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                placeholder="Notas adicionales..."
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowPaymentModal(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Registrar Pago
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

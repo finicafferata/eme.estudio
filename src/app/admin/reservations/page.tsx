@@ -45,7 +45,10 @@ import {
   Trash2,
   Download,
   Users,
-  MapPin
+  MapPin,
+  RefreshCw,
+  CreditCard,
+  Mail
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BulkReservationManager } from '@/components/ui/bulk-reservation-manager'

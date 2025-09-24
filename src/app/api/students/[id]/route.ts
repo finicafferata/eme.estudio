@@ -15,8 +15,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const studentId = parseInt(params.id)
-    if (isNaN(studentId)) {
+    const studentId = BigInt(params.id)
+    if (!params.id || isNaN(Number(params.id))) {
       return NextResponse.json({ error: 'Invalid student ID' }, { status: 400 })
     }
 
@@ -104,7 +104,8 @@ export async function GET(
       lastName: student.lastName,
       email: student.email,
       phone: student.phone,
-      
+      instagram: student.instagramHandle,
+      notes: student.notes,
       status: student.status,
       
       createdAt: student.createdAt.toISOString(),
@@ -174,6 +175,15 @@ export async function PUT(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  let studentId: BigInt | undefined
+  let firstName: string | undefined
+  let lastName: string | undefined
+  let email: string | undefined
+  let phone: string | undefined
+  let instagram: string | undefined
+  let notes: string | undefined
+  let status: string | undefined
+
   try {
     const params = await context.params
     const session = await auth()
@@ -182,13 +192,20 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const studentId = parseInt(params.id)
-    if (isNaN(studentId)) {
+    studentId = BigInt(params.id)
+    if (!params.id || isNaN(Number(params.id))) {
       return NextResponse.json({ error: 'Invalid student ID' }, { status: 400 })
     }
 
     const body = await request.json()
-    const { firstName, lastName, email, phone, instagram, notes, status } = body
+    const requestBody = body as { firstName: string; lastName: string; email: string; phone?: string; instagram?: string; notes?: string; status?: string }
+    firstName = requestBody.firstName
+    lastName = requestBody.lastName
+    email = requestBody.email
+    phone = requestBody.phone
+    instagram = requestBody.instagram
+    notes = requestBody.notes
+    status = requestBody.status
 
     if (!firstName || !lastName || !email) {
       return NextResponse.json(
@@ -230,11 +247,21 @@ export async function PUT(
         lastName,
         email,
         phone,
-        instagram,
+        instagramHandle: instagram,
         notes,
         ...(status && { status: status as UserStatus })
       },
-      include: {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        instagramHandle: true,
+        notes: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         packages: {
           select: {
             id: true,
@@ -270,7 +297,8 @@ export async function PUT(
       lastName: updatedStudent.lastName,
       email: updatedStudent.email,
       phone: updatedStudent.phone,
-      
+      instagram: updatedStudent.instagramHandle,
+      notes: updatedStudent.notes,
       status: updatedStudent.status,
       
       createdAt: updatedStudent.createdAt.toISOString(),
@@ -294,6 +322,11 @@ export async function PUT(
     return NextResponse.json(studentResponse)
   } catch (error) {
     console.error('Student PUT error:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      studentId,
+      updatedData: { firstName, lastName, email, phone, instagram, notes, status }
+    })
     return NextResponse.json(
       { error: 'Failed to update student' },
       { status: 500 }
@@ -313,8 +346,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const studentId = parseInt(params.id)
-    if (isNaN(studentId)) {
+    const studentId = BigInt(params.id)
+    if (!params.id || isNaN(Number(params.id))) {
       return NextResponse.json({ error: 'Invalid student ID' }, { status: 400 })
     }
 

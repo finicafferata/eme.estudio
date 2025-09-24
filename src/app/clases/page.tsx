@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,7 +35,8 @@ import {
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import GuestBookingForm from '@/components/ui/guest-booking-form'
+import GuestBookingFormV2 from '@/components/ui/guest-booking-form-v2'
+import { t } from '@/lib/translations'
 
 interface PublicClass {
   id: string
@@ -190,15 +192,15 @@ export default function PublicClassesPage() {
 
   const renderFrameAvailability = (frameAvailability: PublicClass['frameAvailability']) => {
     return (
-      <div className="flex flex-wrap gap-3">
-        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.small.available)}`}>
-          <span className="font-medium">Small:</span> {frameAvailability.small.available}/{frameAvailability.small.capacity}
+      <div className="flex flex-wrap gap-2 sm:gap-3">
+        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.small.available)} flex-shrink-0`}>
+          <span className="font-medium">{t('small')}:</span> {frameAvailability.small.available}/{frameAvailability.small.capacity}
         </div>
-        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.medium.available)}`}>
-          <span className="font-medium">Medium:</span> {frameAvailability.medium.available}/{frameAvailability.medium.capacity}
+        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.medium.available)} flex-shrink-0`}>
+          <span className="font-medium">{t('medium')}:</span> {frameAvailability.medium.available}/{frameAvailability.medium.capacity}
         </div>
-        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.large.available)}`}>
-          <span className="font-medium">Large:</span> {frameAvailability.large.available}/{frameAvailability.large.capacity}
+        <div className={`text-xs px-2 py-1 rounded-md border ${getFrameAvailabilityColor(frameAvailability.large.available)} flex-shrink-0`}>
+          <span className="font-medium">{t('large')}:</span> {frameAvailability.large.available}/{frameAvailability.large.capacity}
         </div>
       </div>
     )
@@ -221,28 +223,41 @@ export default function PublicClassesPage() {
   const groupedClasses = groupClassesByDate(classes)
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Class Schedule</h1>
-          <p className="text-muted-foreground">
-            Book classes at EME Estudio - No account required
-          </p>
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex justify-center">
+            <Image
+              src="/images/eme-logo.png"
+              alt="EME Studio Logo"
+              width={60}
+              height={60}
+              className="h-12 w-12 sm:h-15 sm:w-15 object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('classSchedule')}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {t('bookClassesAtEme')}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={loadClasses}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {t('refresh')}
           </Button>
           <Button
             variant="outline"
             onClick={() => router.push('/login')}
+            className="w-full sm:w-auto"
           >
-            Already have an account?
+            {t('alreadyHaveAccount')}
           </Button>
         </div>
       </div>
@@ -259,19 +274,19 @@ export default function PublicClassesPage() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Filter className="mr-2 h-5 w-5" />
-            Filters
+            {t('filters')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <Label>Class Type</Label>
+              <Label className="text-sm font-medium">{t('classType')}</Label>
               <Select value={classTypeFilter} onValueChange={setClassTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All types" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('allTypes')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="all">{t('allTypes')}</SelectItem>
                   {filterOptions.classTypes.map((type) => (
                     <SelectItem key={type.id} value={type.slug}>
                       {type.name}
@@ -281,13 +296,13 @@ export default function PublicClassesPage() {
               </Select>
             </div>
             <div>
-              <Label>Instructor</Label>
+              <Label className="text-sm font-medium">{t('instructor')}</Label>
               <Select value={instructorFilter} onValueChange={setInstructorFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All instructors" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('allInstructors')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All instructors</SelectItem>
+                  <SelectItem value="all">{t('allInstructors')}</SelectItem>
                   {filterOptions.instructors.map((instructor) => (
                     <SelectItem key={instructor.id} value={instructor.name}>
                       {instructor.name}
@@ -297,16 +312,16 @@ export default function PublicClassesPage() {
               </Select>
             </div>
             <div>
-              <Label>Weeks Ahead</Label>
+              <Label className="text-sm font-medium">{t('weeksAhead')}</Label>
               <Select value={weeksAhead.toString()} onValueChange={(value) => setWeeksAhead(parseInt(value))}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">2 weeks</SelectItem>
-                  <SelectItem value="3">3 weeks</SelectItem>
-                  <SelectItem value="4">4 weeks</SelectItem>
-                  <SelectItem value="6">6 weeks</SelectItem>
+                  <SelectItem value="2">2 {t('weeks')}</SelectItem>
+                  <SelectItem value="3">3 {t('weeks')}</SelectItem>
+                  <SelectItem value="4">4 {t('weeks')}</SelectItem>
+                  <SelectItem value="6">6 {t('weeks')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -318,8 +333,9 @@ export default function PublicClassesPage() {
                   setInstructorFilter('all')
                   setWeeksAhead(4)
                 }}
+                className="w-full"
               >
-                Clear Filters
+                {t('clearFilters')}
               </Button>
             </div>
           </div>
@@ -332,7 +348,7 @@ export default function PublicClassesPage() {
           <Card>
             <CardContent className="p-8 text-center">
               <div className="text-muted-foreground">
-                No classes found for the selected criteria.
+                {t('noClassesFound')}
               </div>
             </CardContent>
           </Card>
@@ -340,7 +356,7 @@ export default function PublicClassesPage() {
           groupedClasses.map(([date, dayClasses]) => (
             <Card key={date}>
               <CardHeader>
-                <CardTitle>{dayClasses[0] ? formatDate(dayClasses[0].startsAt) : 'No classes'}</CardTitle>
+                <CardTitle>{dayClasses[0] ? formatDate(dayClasses[0].startsAt) : t('noClasses')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
@@ -349,37 +365,37 @@ export default function PublicClassesPage() {
                       key={classItem.id}
                       className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-2">
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
                           <div className="flex items-center space-x-3">
                             <h3 className="font-semibold text-lg">
                               {classItem.classType.name}
                             </h3>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                             <div className="flex items-center text-muted-foreground">
-                              <Clock className="mr-2 h-4 w-4" />
-                              {formatTime(classItem.startsAt)} - {formatTime(classItem.endsAt)}
+                              <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{formatTime(classItem.startsAt)} - {formatTime(classItem.endsAt)}</span>
                             </div>
 
                             {classItem.instructor && (
                               <div className="flex items-center text-muted-foreground">
-                                <User className="mr-2 h-4 w-4" />
-                                {classItem.instructor.name}
+                                <User className="mr-2 h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{classItem.instructor.name}</span>
                               </div>
                             )}
 
-                            <div className="flex items-center text-muted-foreground">
-                              <MapPin className="mr-2 h-4 w-4" />
-                              {classItem.location.name}
+                            <div className="flex items-center text-muted-foreground sm:col-span-2 lg:col-span-1">
+                              <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{classItem.location.name}</span>
                             </div>
                           </div>
 
                           {/* Frame Size Availability */}
                           <div className="mt-3">
                             <div className="text-sm font-medium text-gray-700 mb-2">
-                              Tufting Gun Availability:
+                              {t('tuftingGunAvailability')}
                             </div>
                             {renderFrameAvailability(classItem.frameAvailability)}
                           </div>
@@ -391,17 +407,18 @@ export default function PublicClassesPage() {
                           )}
                         </div>
 
-                        <div className="ml-4">
+                        <div className="lg:ml-4 flex-shrink-0">
                           {classItem.availability.canBook ? (
                             <Button
                               onClick={() => openBookingModal(classItem)}
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-green-600 hover:bg-green-700 w-full lg:w-auto"
+                              size="sm"
                             >
-                              Book Class
+                              {t('bookClass')}
                             </Button>
                           ) : (
-                            <Button variant="outline" disabled>
-                              Class Full
+                            <Button variant="outline" disabled className="w-full lg:w-auto" size="sm">
+                              {t('classFull')}
                             </Button>
                           )}
                         </div>
@@ -417,14 +434,14 @@ export default function PublicClassesPage() {
 
       {/* Guest Booking Modal */}
       <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Book Class</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg sm:text-xl">{t('bookClass')}</DialogTitle>
+            <DialogDescription className="text-sm">
               {selectedClass && (
                 <>
-                  {selectedClass.classType.name} on{' '}
-                  {formatDate(selectedClass.startsAt)} at{' '}
+                  {selectedClass.classType.name} {t('on')}{' '}
+                  {formatDate(selectedClass.startsAt)} {t('at')}{' '}
                   {formatTime(selectedClass.startsAt)}
                 </>
               )}
@@ -432,7 +449,7 @@ export default function PublicClassesPage() {
           </DialogHeader>
 
           {selectedClass && (
-            <GuestBookingForm
+            <GuestBookingFormV2
               classData={selectedClass}
               onSuccess={() => {
                 setBookingOpen(false)

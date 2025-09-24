@@ -148,9 +148,9 @@ async function main() {
 
   const principalLocation = await prisma.location.create({
     data: {
-      name: 'EME Studio Principal',
+      name: 'EME Studio',
       slug: 'eme-principal',
-      address: 'Av. Corrientes 1234, CABA, Buenos Aires',
+      address: 'José Penna 989, San Isidro',
       capacity: 6,
       amenities: ['Telares', 'Herramientas completas', 'Materiales incluidos', 'Café', 'Wi-Fi'],
       isActive: true,

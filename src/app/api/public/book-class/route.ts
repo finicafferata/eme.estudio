@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { UserStatus, UserRole, ReservationStatus, PaymentStatus, PaymentMethod, FrameSize } from '@prisma/client'
+import { UserStatus, UserRole, ReservationStatus, PaymentStatus, PaymentMethod, FrameSize, RegistrationType } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
 
@@ -10,18 +10,29 @@ interface GuestBookingRequest {
   firstName: string
   lastName: string
   frameSize: FrameSize
+  registrationType?: RegistrationType
+  packageId?: string
+  paymentDeadline?: string
   paymentMethod: PaymentMethod
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: GuestBookingRequest = await request.json()
-    const { classId, email, firstName, lastName, frameSize, paymentMethod } = body
+    const { classId, email, firstName, lastName, frameSize, registrationType, packageId, paymentDeadline, paymentMethod } = body
 
     // Input validation
     if (!classId || !email || !firstName || !lastName || !frameSize || !paymentMethod) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Faltan campos requeridos' },
+        { status: 400 }
+      )
+    }
+
+    // Validate intensive registration constraints
+    if (registrationType === 'INTENSIVE' && frameSize !== 'SMALL') {
+      return NextResponse.json(
+        { error: 'Los cursos intensivos solo pueden usar bastidor PEQUEÑO' },
         { status: 400 }
       )
     }
@@ -30,7 +41,7 @@ export async function POST(request: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: 'Invalid email format' },
+        { error: 'Formato de correo electrónico inválido' },
         { status: 400 }
       )
     }
@@ -79,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     if (!classItem) {
       return NextResponse.json(
-        { error: 'Class not found' },
+        { error: 'Clase no encontrada' },
         { status: 404 }
       )
     }
@@ -101,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     if (frameAvailable <= 0) {
       return NextResponse.json(
-        { error: `No ${frameSize.toLowerCase()} frames available. Try a different frame size.` },
+        { error: `No hay bastidores ${frameSize.toLowerCase()} disponibles. Prueba con otro tamaño.` },
         { status: 400 }
       )
     }
@@ -179,32 +190,147 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Handle package usage if provided
+    let usedPackage = false
+    if (packageId) {
+      const pkg = await prisma.package.findUnique({
+        where: { id: BigInt(packageId) }
+      })
+
+      if (pkg && pkg.userId === user.id && pkg.status === 'ACTIVE') {
+        const availableCredits = pkg.totalCredits - pkg.usedCredits
+        if (availableCredits > 0) {
+          // Update package credits
+          await prisma.package.update({
+            where: { id: BigInt(packageId) },
+            data: {
+              usedCredits: pkg.usedCredits + 1,
+              status: (pkg.usedCredits + 1 >= pkg.totalCredits) ? 'USED_UP' : 'ACTIVE'
+            }
+          })
+          usedPackage = true
+        }
+      }
+    }
+
+    // Calculate payment deadline if not using a package
+    const finalPaymentDeadline = !usedPackage && paymentDeadline ? new Date(paymentDeadline) : null
+
     // Create the reservation
     const reservation = await prisma.reservation.create({
       data: {
         userId: user.id,
         classId: BigInt(classId),
+        packageId: usedPackage && packageId ? BigInt(packageId) : null,
         frameSize,
+        registrationType: registrationType || null,
+        paymentDeadline: finalPaymentDeadline,
         status: ReservationStatus.CONFIRMED,
         notes: userCreated ? 'Guest booking - account created automatically' : 'Guest booking'
       }
     })
 
-    // Create payment record
-    const payment = await prisma.payment.create({
-      data: {
-        userId: user.id,
-        amount: classItem.classType.defaultPrice,
-        currency: 'USD',
-        paymentMethod,
-        status: PaymentStatus.PENDING,
-        description: `Single class payment: ${classItem.classType.name}`,
-        metadata: {
-          reservationId: reservation.id.toString(),
-          bookingType: 'guest-single-class'
+    // For new users, create a package instead of payment
+    let payment = null
+    let createdPackage = null
+
+    if (!usedPackage) {
+      if (userCreated) {
+        // New user: Create package with PENDING_PAYMENT status based on registration type
+        let packageData
+
+        if (registrationType === 'INTENSIVE') {
+          // Create intensive package - price to be set by admin
+          packageData = {
+            userId: user.id,
+            name: `Intensive Package - ${classItem.classType.name}`,
+            classTypeId: classItem.classTypeId,
+            totalCredits: 3,
+            usedCredits: 1, // Already used for this reservation
+            price: 0, // Price will be set manually by admin
+            status: 'PENDING_PAYMENT',
+            purchasedAt: new Date(),
+            metadata: {
+              bookingType: 'guest-intensive-package',
+              registrationType: registrationType,
+              classId: classItem.id.toString(),
+              reservationId: reservation.id.toString(),
+              requiresManualPayment: true,
+              isIntensive: true,
+              priceSetByAdmin: true
+            }
+          }
+        } else if (registrationType === 'RECURRENT') {
+          // Create recurrent package - price to be set by admin
+          packageData = {
+            userId: user.id,
+            name: `Recurrent Package - ${classItem.classType.name}`,
+            classTypeId: classItem.classTypeId,
+            totalCredits: 8,
+            usedCredits: 1, // Already used for this reservation
+            price: 0, // Price will be set manually by admin
+            status: 'PENDING_PAYMENT',
+            purchasedAt: new Date(),
+            metadata: {
+              bookingType: 'guest-recurrent-package',
+              registrationType: registrationType,
+              classId: classItem.id.toString(),
+              reservationId: reservation.id.toString(),
+              requiresManualPayment: true,
+              isRecurrent: true,
+              priceSetByAdmin: true
+            }
+          }
+        } else {
+          // Single classes are not charged - create free package
+          packageData = {
+            userId: user.id,
+            name: `Single Class - ${classItem.classType.name}`,
+            classTypeId: classItem.classTypeId,
+            totalCredits: 1,
+            usedCredits: 1, // Already used for this reservation
+            price: 0, // Single classes are free
+            status: 'ACTIVE', // Single classes are automatically active (free)
+            purchasedAt: new Date(),
+            metadata: {
+              bookingType: 'guest-single-class-free',
+              registrationType: registrationType || 'standard',
+              classId: classItem.id.toString(),
+              reservationId: reservation.id.toString(),
+              isFree: true
+            }
+          }
         }
+
+        createdPackage = await prisma.package.create({
+          data: packageData
+        })
+
+        // Update reservation to link to the new package
+        await prisma.reservation.update({
+          where: { id: reservation.id },
+          data: { packageId: createdPackage.id }
+        })
+      } else {
+        // Existing user: Create payment record as before
+        payment = await prisma.payment.create({
+          data: {
+            userId: user.id,
+            amount: classItem.classType.defaultPrice,
+            currency: 'USD',
+            paymentMethod,
+            status: PaymentStatus.PENDING,
+            description: `Single class payment: ${classItem.classType.name}`,
+            metadata: {
+              reservationId: reservation.id.toString(),
+              bookingType: 'guest-single-class',
+              registrationType: registrationType || 'standard',
+              paymentDeadline: finalPaymentDeadline?.toISOString() || null
+            }
+          }
+        })
       }
-    })
+    }
 
     // Prepare response data
     const responseData = {
@@ -235,19 +361,42 @@ export async function POST(request: NextRequest) {
         isNewUser: userCreated,
         needsActivation: user.status === UserStatus.PENDING_ACTIVATION
       },
-      payment: {
+      payment: payment ? {
         id: payment.id.toString(),
         amount: Number(payment.amount),
         currency: payment.currency,
         method: payment.paymentMethod,
-        status: payment.status
-      },
+        status: payment.status,
+        deadline: finalPaymentDeadline?.toISOString() || null
+      } : null,
+      package: createdPackage ? {
+        id: createdPackage.id.toString(),
+        name: createdPackage.name,
+        totalCredits: createdPackage.totalCredits,
+        usedCredits: createdPackage.usedCredits,
+        remainingCredits: createdPackage.totalCredits - createdPackage.usedCredits,
+        status: createdPackage.status,
+        price: Number(createdPackage.price),
+        requiresPayment: createdPackage.status === 'PENDING_PAYMENT',
+        isFree: createdPackage.price === 0 && createdPackage.status === 'ACTIVE'
+      } : null,
+      registrationType: registrationType || null,
+      usedPackage,
       frameSize,
       nextSteps: {
         checkEmail: true,
         arriveEarly: true,
-        activateAccount: userCreated
-      }
+        activateAccount: userCreated,
+        paymentRequired: createdPackage ? createdPackage.status === 'PENDING_PAYMENT' : false
+      },
+      paymentInstructions: createdPackage && createdPackage.status === 'PENDING_PAYMENT' ? {
+        message: registrationType === 'INTENSIVE'
+          ? "Tu paquete intensivo requiere pago. El estudio se contactará contigo para coordinar el pago."
+          : registrationType === 'RECURRENT'
+          ? "Tu paquete recurrente requiere pago. El estudio se contactará contigo para coordinar el pago."
+          : "Se requiere pago para tu reserva. El estudio se contactará contigo.",
+        contactInfo: "EME Studio se pondrá en contacto contigo para coordinar el pago según tu preferencia (efectivo, transferencia, etc.)."
+      } : null
     }
 
     // TODO: Send confirmation email (implement in next task)

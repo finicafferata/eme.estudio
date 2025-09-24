@@ -799,7 +799,7 @@ export default function PaymentsPage() {
                         <div>
                           <div className="font-medium">{payment.package.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {payment.package.classType.name}
+                            {payment.package.classType?.name || 'General'}
                           </div>
                         </div>
                       ) : (

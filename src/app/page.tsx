@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -38,6 +39,15 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <div className="text-center">
           <div className="mb-6">
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/images/eme-logo.png"
+                alt="EME Studio Logo"
+                width={80}
+                height={80}
+                className="h-20 w-20 object-contain"
+              />
+            </div>
             <h1 className="text-4xl font-bold text-primary mb-2">EME Estudio</h1>
             <p className="text-gray-600">Estudio Profesional de Tufting</p>
           </div>
@@ -52,6 +62,15 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <div className="text-center">
         <div className="mb-6">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/images/eme-logo.png"
+              alt="EME Studio Logo"
+              width={80}
+              height={80}
+              className="h-20 w-20 object-contain"
+            />
+          </div>
           <h1 className="text-4xl font-bold text-primary mb-2">EME Estudio</h1>
           <p className="text-gray-600">Estudio Profesional de Tufting</p>
         </div>

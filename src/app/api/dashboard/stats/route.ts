@@ -294,7 +294,7 @@ export async function GET() {
 
     const formatClassesWithAttendance = (classes: any[]) => {
       return classes.map(classItem => ({
-        id: classItem.id,
+        id: classItem.id.toString(),
         title: classItem.classType.name,
         time: new Date(classItem.startsAt).toLocaleTimeString('es-AR', {
           hour: '2-digit',
@@ -303,7 +303,7 @@ export async function GET() {
         instructor: `${classItem.instructor?.user.firstName} ${classItem.instructor?.user.lastName}`,
         capacity: classItem.capacity,
         attendees: classItem.reservations.map((reservation: any) => ({
-          id: reservation.id,
+          id: reservation.id.toString(),
           name: `${reservation.user.firstName} ${reservation.user.lastName}`,
           email: reservation.user.email
         })),
@@ -342,7 +342,12 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json(stats)
+    // Convert BigInt values to strings for JSON serialization
+    const serializedStats = JSON.parse(JSON.stringify(stats, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    ))
+
+    return NextResponse.json(serializedStats)
   } catch (error) {
     console.error('Dashboard stats error:', error)
     return NextResponse.json(

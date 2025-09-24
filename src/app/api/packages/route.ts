@@ -346,6 +346,14 @@ export async function POST(request: Request) {
           userId: parseInt(studentId),
           packageId: newPackage.id,
           paidAt: new Date()
+        },
+        select: {
+          id: true,
+          amount: true,
+          currency: true,
+          status: true,
+          paymentMethod: true,
+          paidAt: true
         }
       })
     }

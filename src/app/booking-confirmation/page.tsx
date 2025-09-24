@@ -16,9 +16,7 @@ import {
   Mail,
   AlertCircle,
   ArrowLeft,
-  Share2,
-  Download,
-  RefreshCw
+  AlertTriangle
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 
@@ -26,6 +24,13 @@ interface ReservationDetails {
   id: string
   uuid: string
   status: string
+  packageId: string | null
+  paymentDeadline: string | null
+  usedPackage: {
+    id: string
+    name: string
+    status: string
+  } | null
   class: {
     id: string
     name: string
@@ -51,7 +56,7 @@ interface ReservationDetails {
     currency: string
     method: string
     status: string
-  }
+  } | null
   credits: {
     totalAvailable: number
     packages: Array<{
@@ -69,7 +74,13 @@ interface ReservationDetails {
     checkEmail: boolean
     arriveEarly: boolean
     activateAccount: boolean
+    paymentRequired?: boolean
   }
+  paymentInstructions?: {
+    packageName: string
+    message: string
+    contactInfo: string
+  } | null
 }
 
 function BookingConfirmationContent() {
@@ -112,45 +123,61 @@ function BookingConfirmationContent() {
     loadReservationDetails()
   }, [reservationId])
 
-  const handleShare = async () => {
-    if (!reservation) return
+  // Payment status checks
+  const hasUsedPackage = () => {
+    return reservation?.usedPackage !== null
+  }
 
-    const shareData = {
-      title: `Class Booked: ${reservation.class.name}`,
-      text: `I've booked a class at EME Estudio! ${reservation.class.name} on ${format(parseISO(reservation.class.startsAt), 'EEEE, MMMM do')} at ${format(parseISO(reservation.class.startsAt), 'HH:mm')}`,
-      url: window.location.href
-    }
+  const hasPayment = () => {
+    return reservation?.payment !== null && reservation?.payment?.status === 'PAID'
+  }
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData)
-      } catch (error) {
-        console.log('Share canceled')
-      }
-    } else {
-      // Fallback to clipboard
-      try {
-        await navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`)
-        alert('Booking details copied to clipboard!')
-      } catch (error) {
-        console.error('Failed to copy to clipboard')
-      }
-    }
+  const needsPayment = () => {
+    // Needs payment if:
+    // 1. No package was used AND
+    // 2. No payment exists OR payment is pending
+    return !hasUsedPackage() && (!reservation?.payment || reservation?.payment?.status === 'PENDING')
+  }
+
+  const getPaymentDeadline = () => {
+    if (!reservation || !reservation.paymentDeadline) return null
+    return new Date(reservation.paymentDeadline)
+  }
+
+  const isUrgentPayment = () => {
+    if (!reservation || !reservation.paymentDeadline) return false
+    const deadline = new Date(reservation.paymentDeadline)
+    const now = new Date()
+    const hoursUntilDeadline = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60)
+    return hoursUntilDeadline <= 1 // Payment needed within 1 hour
+  }
+
+  const getTimeUntilClass = () => {
+    if (!reservation) return null
+    const classDate = new Date(reservation.class.startsAt)
+    const now = new Date()
+    const hoursUntil = (classDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+    return hoursUntil
   }
 
   const formatPaymentMethod = (method: string) => {
     const methodLabels: Record<string, string> = {
-      CASH_PESOS: 'Cash (Pesos)',
-      CASH_USD: 'Cash (USD)',
-      TRANSFER_TO_MERI_PESOS: 'Transfer to Meri (Pesos)',
-      TRANSFER_TO_MALE_PESOS: 'Transfer to Male (Pesos)',
-      TRANSFER_IN_USD: 'Transfer (USD)'
+      CASH_PESOS: 'Efectivo (Pesos)',
+      CASH_USD: 'Efectivo (USD)',
+      TRANSFER_TO_MERI_PESOS: 'Transferencia a Meri (Pesos)',
+      TRANSFER_TO_MALE_PESOS: 'Transferencia a Male (Pesos)',
+      TRANSFER_IN_USD: 'Transferencia (USD)'
     }
     return methodLabels[method] || method
   }
 
   const formatFrameSize = (size: string) => {
-    return size.charAt(0) + size.slice(1).toLowerCase()
+    const sizes: Record<string, string> = {
+      'SMALL': 'Pequeño',
+      'MEDIUM': 'Mediano',
+      'LARGE': 'Grande'
+    }
+    return sizes[size] || size
   }
 
   if (loading) {
@@ -169,16 +196,16 @@ function BookingConfirmationContent() {
         <Card className="max-w-2xl mx-auto">
           <CardContent className="p-8 text-center">
             <AlertCircle className="mx-auto h-16 w-16 text-red-500 mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Reservation Not Found</h1>
+            <h1 className="text-2xl font-bold mb-2">Reserva No Encontrada</h1>
             <p className="text-muted-foreground mb-6">
-              {error || 'The reservation you\'re looking for could not be found.'}
+              {error || 'No pudimos encontrar la reserva que estás buscando.'}
             </p>
             <div className="space-x-4">
-              <Button onClick={() => router.push('/classes')}>
-                View Classes
+              <Button onClick={() => router.push('/clases')}>
+                Ver Clases
               </Button>
               <Button variant="outline" onClick={() => router.push('/')}>
-                Go Home
+                Ir al Inicio
               </Button>
             </div>
           </CardContent>
@@ -193,33 +220,103 @@ function BookingConfirmationContent() {
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
-          onClick={() => router.push('/classes')}
+          onClick={() => router.push('/clases')}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Classes
+          Volver a Clases
         </Button>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
-          </Button>
-        </div>
       </div>
 
       {/* Success Header */}
       <Card className="max-w-4xl mx-auto">
         <CardContent className="p-8 text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-          <h1 className="text-3xl font-bold mb-2">Booking Confirmed!</h1>
+          <h1 className="text-3xl font-bold mb-2">¡Reserva Confirmada!</h1>
           <p className="text-xl text-muted-foreground mb-4">
-            Your class has been successfully booked
+            Tu clase ha sido reservada exitosamente
           </p>
           <Badge variant="secondary" className="text-lg px-4 py-2">
-            Reservation: {reservation.uuid}
+            Reserva: {reservation.uuid}
           </Badge>
         </CardContent>
       </Card>
+
+      {/* Payment Status Messages */}
+      {hasUsedPackage() && reservation?.usedPackage && reservation.usedPackage.status === 'ACTIVE' && (
+        <Alert className="max-w-4xl mx-auto border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription>
+            <strong className="text-green-800">Clase pagada con tu paquete</strong><br />
+            <span className="text-green-700">Usaste un crédito de tu paquete: {reservation.usedPackage.name}</span>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {hasPayment() && (
+        <Alert className="max-w-4xl mx-auto border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription>
+            <strong className="text-green-800">Pago registrado</strong><br />
+            <span className="text-green-700">Tu pago ha sido confirmado. ¡Te esperamos en la clase!</span>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {needsPayment() && (
+        <Alert
+          variant={isUrgentPayment() ? "destructive" : "warning"}
+          className={`max-w-4xl mx-auto ${isUrgentPayment() ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}
+        >
+          <AlertTriangle className={`h-4 w-4 ${isUrgentPayment() ? 'text-red-600' : 'text-yellow-600'}`} />
+          <AlertDescription>
+            <strong className={isUrgentPayment() ? 'text-red-800' : 'text-yellow-800'}>
+              {isUrgentPayment() ? '¡PAGO URGENTE REQUERIDO!' : 'Recordatorio de Pago'}
+            </strong><br />
+            <span className={isUrgentPayment() ? 'text-red-700' : 'text-yellow-700'}>
+              {(() => {
+                const hoursUntilClass = getTimeUntilClass()
+                const deadline = getPaymentDeadline()
+
+                if (isUrgentPayment()) {
+                  if (hoursUntilClass && hoursUntilClass <= 2) {
+                    return (
+                      <>
+                        <strong>Tu clase empieza pronto.</strong> Por favor, realizá el pago inmediatamente para confirmar tu lugar.<br />
+                        <strong>Tenés hasta las {deadline ? format(deadline, 'HH:mm') : 'N/A'} hs para pagar.</strong><br />
+                        Pasado este tiempo, tu reserva será cancelada automáticamente.
+                      </>
+                    )
+                  }
+                }
+
+                return (
+                  <>
+                    Recordá que tenés que abonar la clase antes del inicio.<br />
+                    <strong>Fecha límite de pago:</strong> {deadline ? format(deadline, 'dd/MM/yyyy HH:mm') : 'N/A'} hs.<br />
+                    Si no se recibe el pago, tu reserva será cancelada automáticamente.
+                  </>
+                )
+              })()}
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Payment Instructions for Packages */}
+      {reservation?.paymentInstructions && reservation?.nextSteps?.paymentRequired && (
+        <Alert className="max-w-4xl mx-auto border-orange-200 bg-orange-50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription>
+            <strong className="text-orange-800">Se requiere pago para tu paquete</strong><br />
+            <span className="text-orange-700 mb-2 block">{reservation.paymentInstructions.message}</span>
+            <div className="text-sm text-orange-700 bg-orange-100 p-2 rounded mt-2">
+              <strong>Paquete:</strong> {reservation.paymentInstructions.packageName}<br />
+              <strong>¿Cómo pagar?</strong> {reservation.paymentInstructions.contactInfo}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="max-w-4xl mx-auto grid gap-6 md:grid-cols-2">
         {/* Class Details */}
@@ -227,7 +324,7 @@ function BookingConfirmationContent() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Calendar className="mr-2 h-5 w-5" />
-              Class Details
+              Detalles de la Clase
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -261,12 +358,12 @@ function BookingConfirmationContent() {
             <div className="border-t pt-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Frame Size:</span>
+                  <span className="text-muted-foreground">Tamaño del Bastidor:</span>
                   <div className="font-medium">{formatFrameSize(reservation.frameSize)}</div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Status:</span>
-                  <div className="font-medium text-green-600">{reservation.status}</div>
+                  <span className="text-muted-foreground">Estado:</span>
+                  <div className="font-medium text-green-600">CONFIRMADO</div>
                 </div>
               </div>
             </div>
@@ -278,16 +375,16 @@ function BookingConfirmationContent() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <CreditCard className="mr-2 h-5 w-5" />
-              Credits & Contact
+              Créditos y Contacto
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="font-medium mb-2">Credit Balance</h4>
+              <h4 className="font-medium mb-2">Balance de Créditos</h4>
               {reservation.credits.hasPackages ? (
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Available Credits:</span>
+                    <span className="text-muted-foreground">Créditos Disponibles:</span>
                     <span className="font-bold text-lg text-green-600">{reservation.credits.totalAvailable}</span>
                   </div>
 
@@ -305,7 +402,7 @@ function BookingConfirmationContent() {
                       </div>
                       {pkg.expiresAt && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          Expires: {format(parseISO(pkg.expiresAt), 'MMM dd, yyyy')}
+                          Vence: {format(parseISO(pkg.expiresAt), 'dd/MM/yyyy')}
                         </div>
                       )}
                     </div>
@@ -313,23 +410,24 @@ function BookingConfirmationContent() {
 
                   {reservation.credits.nextExpiration && (
                     <div className="text-xs text-orange-600">
-                      ⚠️ Next expiration: {format(parseISO(reservation.credits.nextExpiration), 'MMM dd, yyyy')}
+                      ⚠️ Próximo vencimiento: {format(parseISO(reservation.credits.nextExpiration), 'dd/MM/yyyy')}
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <div className="text-muted-foreground mb-2">No active packages</div>
-                  <div className="text-sm">This booking was paid per class</div>
-                  <Button variant="outline" size="sm" className="mt-2" onClick={() => router.push('/packages')}>
-                    Purchase Package
-                  </Button>
+                  <div className="text-muted-foreground mb-2">No tenés paquetes activos</div>
+                  <div className="text-sm">
+                    {hasUsedPackage() ? 'Esta clase fue pagada con un paquete' :
+                     hasPayment() ? 'Esta clase ya fue pagada' :
+                     'Esta reserva se debe pagar por clase'}
+                  </div>
                 </div>
               )}
             </div>
 
             <div className="border-t pt-4">
-              <h4 className="font-medium mb-2">Contact Information</h4>
+              <h4 className="font-medium mb-2">Información de Contacto</h4>
               <div className="space-y-1 text-sm">
                 <div>{reservation.user.firstName} {reservation.user.lastName}</div>
                 <div className="text-muted-foreground">{reservation.user.email}</div>
@@ -342,7 +440,7 @@ function BookingConfirmationContent() {
       {/* Next Steps */}
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>What&apos;s Next?</CardTitle>
+          <CardTitle>¿Qué sigue?</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -350,8 +448,8 @@ function BookingConfirmationContent() {
               <Alert>
                 <Mail className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Check Your Email</strong><br />
-                  We&apos;ve sent confirmation details and class information to your email.
+                  <strong>Revisá tu Correo</strong><br />
+                  Te enviamos los detalles de confirmación e información de la clase a tu correo.
                 </AlertDescription>
               </Alert>
             )}
@@ -360,8 +458,8 @@ function BookingConfirmationContent() {
               <Alert>
                 <Clock className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Arrive 10 Minutes Early</strong><br />
-                  Please arrive at least 10 minutes before class starts for check-in.
+                  <strong>Llegá 10 Minutos Antes</strong><br />
+                  Por favor, llegá al menos 10 minutos antes del inicio de la clase para el check-in.
                 </AlertDescription>
               </Alert>
             )}
@@ -370,8 +468,8 @@ function BookingConfirmationContent() {
               <Alert>
                 <User className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Activate Your Account</strong><br />
-                  Check your email for an activation link to set up your full account.
+                  <strong>Activá tu Cuenta</strong><br />
+                  Revisá tu correo para encontrar el enlace de activación y configurar tu cuenta completa.
                 </AlertDescription>
               </Alert>
             )}
@@ -381,15 +479,15 @@ function BookingConfirmationContent() {
 
       {/* Action Buttons */}
       <div className="max-w-4xl mx-auto flex justify-center space-x-4">
-        <Button onClick={() => router.push('/classes')}>
-          Book Another Class
+        <Button onClick={() => router.push('/clases')}>
+          Reservar Otra Clase
         </Button>
         <Button variant="outline" onClick={() => router.push('/')}>
-          Go to Homepage
+          Ir al Inicio
         </Button>
         {reservation.user.needsActivation && (
           <Button variant="outline" onClick={() => router.push('/login')}>
-            Login to Account
+            Iniciar Sesión
           </Button>
         )}
       </div>
@@ -397,9 +495,10 @@ function BookingConfirmationContent() {
       {/* Studio Contact Info */}
       <Card className="max-w-4xl mx-auto">
         <CardContent className="p-6 text-center text-sm text-muted-foreground">
-          <p className="mb-2">Questions about your booking?</p>
-          <p>Contact EME Estudio: info@emeestudio.com | +1 (555) 123-4567</p>
-          <p className="mt-2">Follow us on social media for updates and announcements</p>
+          <p className="mb-2">¿Tenés preguntas sobre tu reserva?</p>
+          <p>EME Estudio - José Penna 989, San Isidro</p>
+          <p>info@emeestudio.com | WhatsApp: +54 9 11 1234-5678</p>
+          <p className="mt-2">Seguinos en redes sociales para novedades y anuncios</p>
         </CardContent>
       </Card>
     </div>
