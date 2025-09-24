@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary statistics
     const stats = await prisma.reservation.groupBy({
-      by: ['status', 'registrationType'],
+      by: ['status'],
       _count: true,
       where: {
         // Only count recent reservations for stats
@@ -166,8 +166,7 @@ export async function GET(request: NextRequest) {
       },
       stats: {
         byStatus: stats.reduce((acc, stat) => {
-          const key = `${stat.status}_${stat.registrationType || 'standard'}`
-          acc[key] = stat._count
+          acc[stat.status] = stat._count
           return acc
         }, {} as Record<string, number>),
         paymentSummary
