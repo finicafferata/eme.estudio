@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Home",
+    "atelier": "Atelier",
+    "estudio": "Estudio",
+    "about": "About",
+    "contact": "Contact",
+    "portfolio": "Portfolio"
+  },
+  "home": {
+    "hero": {
+      "title": "EME",
+      "subtitle": "Textile Art & Movement"
+    },
+    "atelier": {
+      "title": "EME Atelier",
+      "description": "Handcrafted textile art. Custom rugs, wall art, and unique pieces designed with traditional tufting techniques.",
+      "cta": "View Portfolio"
+    },
+    "estudio": {
+      "title": "EME Estudio",
+      "description": "Movement classes. Yoga, pilates, and wellness sessions in an inspiring creative space.",
+      "cta": "Explore Classes"
+    }
+  },
+  "footer": {
+    "brand": "EME Estudio",
+    "tagline": "Tufting & Textile Art",
+    "navigation": "Navigation",
+    "connect": "Connect",
+    "instagram": "Instagram",
+    "email": "Email",
+    "rights": "All rights reserved"
+  },
+  "about": {
+    "title": "About Us",
+    "loading": "Loading content..."
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Get in touch for commissions or inquiries",
+    "email": "Email",
+    "instagram": "Instagram",
+    "commissions": {
+      "title": "Commission Requests",
+      "description": "Interested in a custom piece? Send us an email with your ideas, preferred size, color palette, and timeline. We'll get back to you within 2-3 business days."
+    }
+  },
+  "atelier": {
+    "title": "EME Atelier",
+    "subtitle": "Explore our collection of handcrafted textile art. Custom rugs, wall art, and unique tufted pieces.",
+    "filter": {
+      "all": "All"
+    },
+    "loading": "Loading portfolio..."
+  },
+  "estudio": {
+    "title": "EME Estudio",
+    "subtitle": "Movement classes in an inspiring creative space",
+    "about": {
+      "title": "About Our Classes",
+      "description": "EME Estudio offers yoga, pilates, and wellness classes designed to nurture body and mind. Our studio provides a welcoming space where movement meets creativity, combining physical practice with artistic inspiration."
+    },
+    "offer": {
+      "title": "What We Offer",
+      "yoga": "Yoga classes for all levels",
+      "pilates": "Pilates mat and reformer sessions",
+      "workshops": "Wellness workshops and special events",
+      "smallGroup": "Small group classes for personalized attention"
+    },
+    "cta": {
+      "title": "Ready to Join Us?",
+      "description": "Book your class through our class reservation system",
+      "button": "Book a Class"
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "description": "Have questions about our classes? We'd love to hear from you.",
+      "button": "Contact Us"
+    }
+  }
+}

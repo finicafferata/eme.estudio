@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "atelier": "Atelier",
+    "estudio": "Estudio",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "portfolio": "Portafolio"
+  },
+  "home": {
+    "hero": {
+      "title": "EME",
+      "subtitle": "Arte Textil & Movimiento"
+    },
+    "atelier": {
+      "title": "EME Atelier",
+      "description": "Arte textil hecho a mano. Alfombras personalizadas, arte de pared y piezas únicas diseñadas con técnicas tradicionales de tufting.",
+      "cta": "Ver Portafolio"
+    },
+    "estudio": {
+      "title": "EME Estudio",
+      "description": "Clases de movimiento. Yoga, pilates y sesiones de bienestar en un espacio creativo inspirador.",
+      "cta": "Explorar Clases"
+    }
+  },
+  "footer": {
+    "brand": "EME Estudio",
+    "tagline": "Tufting & Arte Textil",
+    "navigation": "Navegación",
+    "connect": "Conecta",
+    "instagram": "Instagram",
+    "email": "Correo",
+    "rights": "Todos los derechos reservados"
+  },
+  "about": {
+    "title": "Sobre Nosotros",
+    "loading": "Cargando contenido..."
+  },
+  "contact": {
+    "title": "Contacto",
+    "subtitle": "Contáctanos para encargos o consultas",
+    "email": "Correo Electrónico",
+    "instagram": "Instagram",
+    "commissions": {
+      "title": "Solicitudes de Encargo",
+      "description": "¿Interesado en una pieza personalizada? Envíanos un correo con tus ideas, tamaño preferido, paleta de colores y plazo. Te responderemos en 2-3 días hábiles."
+    }
+  },
+  "atelier": {
+    "title": "EME Atelier",
+    "subtitle": "Explora nuestra colección de arte textil hecho a mano. Alfombras personalizadas, arte de pared y piezas únicas de tufting.",
+    "filter": {
+      "all": "Todos"
+    },
+    "loading": "Cargando portafolio..."
+  },
+  "estudio": {
+    "title": "EME Estudio",
+    "subtitle": "Clases de movimiento en un espacio creativo inspirador",
+    "about": {
+      "title": "Sobre Nuestras Clases",
+      "description": "EME Estudio ofrece clases de yoga, pilates y bienestar diseñadas para nutrir cuerpo y mente. Nuestro estudio proporciona un espacio acogedor donde el movimiento se encuentra con la creatividad, combinando la práctica física con la inspiración artística."
+    },
+    "offer": {
+      "title": "Qué Ofrecemos",
+      "yoga": "Clases de yoga para todos los niveles",
+      "pilates": "Sesiones de pilates en colchoneta y reformer",
+      "workshops": "Talleres de bienestar y eventos especiales",
+      "smallGroup": "Clases en grupos pequeños para atención personalizada"
+    },
+    "cta": {
+      "title": "¿Listo para Unirte?",
+      "description": "Reserva tu clase a través de nuestro sistema de reservas",
+      "button": "Reservar Clase"
+    },
+    "contact": {
+      "title": "Ponte en Contacto",
+      "description": "¿Tienes preguntas sobre nuestras clases? Nos encantaría saber de ti.",
+      "button": "Contáctanos"
+    }
+  }
+}

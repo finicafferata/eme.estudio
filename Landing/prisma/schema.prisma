@@ -1,0 +1,76 @@
+// This is your Prisma schema file
+// EME Estudio - Portfolio Website Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password_hash String
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  slug        String    @unique
+  images      Image[]
+  category    Category? @relation(fields: [category_id], references: [id])
+  category_id String?
+  featured    Boolean   @default(false)
+  order       Int       @default(0)
+  visible     Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@index([category_id])
+  @@index([featured])
+  @@index([visible])
+}
+
+model Image {
+  id            String   @id @default(cuid())
+  product       Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id    String
+  cloudinary_id String
+  url           String
+  thumbnail_url String
+  alt_text      String?
+  order         Int      @default(0)
+  created_at    DateTime @default(now())
+
+  @@index([product_id])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  products    Product[]
+  order       Int       @default(0)
+  created_at  DateTime  @default(now())
+}
+
+model Content {
+  id         String   @id @default(cuid())
+  key        String   @unique
+  value      String   @db.Text
+  updated_at DateTime @updatedAt
+}
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+}
